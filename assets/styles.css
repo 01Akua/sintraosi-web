@@ -153,8 +153,14 @@ nav.links a.active::after{width:100%; background:var(--blue-400);}
 .aliados::before{content:""; position:absolute; inset:0; background:linear-gradient(100deg, rgba(10,36,24,0.94) 25%, rgba(18,55,35,0.8) 100%);}
 .aliados .wrap{position:relative; z-index:1;}
 .aliados-row{display:flex; gap:36px; align-items:center; justify-content:center; flex-wrap:wrap; opacity:0.85;}
-.aliados .aliado{font-family:'IBM Plex Mono'; font-size:0.78rem; padding:10px 16px; border-radius:8px; color:rgba(255,255,255,0.85); border:1px dashed rgba(255,255,255,0.28); transition:border-color .2s ease, color .2s ease;}
-.aliados .aliado:hover{border-color:var(--blue-400); color:#fff;}
+.aliado-logo{
+  background:#fff; border-radius:10px; padding:12px 22px;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 6px 18px -8px rgba(0,0,0,0.35);
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+.aliado-logo:hover{transform:translateY(-3px); box-shadow:0 10px 24px -8px rgba(0,0,0,0.4);}
+.aliado-logo img{height:38px; width:auto; display:block;}
 
 /* ---------- social row footer ---------- */
 .social-row{display:flex; gap:10px; margin-top:14px;}
