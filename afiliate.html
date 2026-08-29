@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Afíliate — SINTRAOSI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body data-page="afiliate">
+
+<div id="header-placeholder"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="breadcrumb"><a href="index.html">Inicio</a> / <span>Afíliate</span></div>
+    <h1>Sindicato nacional de trabajadores de la Organización Sanitas Internacional</h1>
+    <p class="lede">Tu afiliación es confidencial y te protege desde el primer día por fuero sindical. Completa el formulario y un delegado de tu regional revisará tu solicitud en menos de 48 horas.</p>
+  </div>
+</section>
+
+<section class="cta-final" style="padding:44px 0;">
+  <div class="wrap">
+    <ul class="req-list reveal" style="flex-direction:row; flex-wrap:wrap; gap:14px;">
+      <li>Datos personales y de residencia</li>
+      <li>Empresa y tipo de contrato</li>
+      <li>Fotocopia de la cédula</li>
+      <li>Certificación laboral vigente</li>
+    </ul>
+  </div>
+</section>
+
+<section class="afiliate-form">
+  <div class="wrap" style="max-width:880px;">
+    <form class="form-card reveal" onsubmit="return false;">
+      <h3>Datos personales</h3>
+      <div class="form-grid">
+        <div class="field"><label>Primer nombre</label><input type="text"></div>
+        <div class="field"><label>Segundo nombre</label><input type="text"></div>
+        <div class="field"><label>Primer apellido</label><input type="text"></div>
+        <div class="field"><label>Segundo apellido</label><input type="text"></div>
+        <div class="field"><label>Número de cédula</label><input type="text"></div>
+        <div class="field"><label>Lugar de expedición</label><input type="text"></div>
+        <div class="field"><label>Fecha de nacimiento</label><input type="date"></div>
+        <div class="field"><label>Lugar de nacimiento</label><input type="text"></div>
+        <div class="field"><label>Estado civil</label>
+          <select><option>Seleccione…</option><option>Soltero (a)</option><option>Casado (a)</option><option>Unión libre</option></select>
+        </div>
+      </div>
+
+      <h3>Residencia</h3>
+      <div class="form-grid">
+        <div class="field"><label>Departamento de residencia</label><input type="text"></div>
+        <div class="field"><label>Municipio de residencia</label><input type="text"></div>
+        <div class="field" style="grid-column:1/-1;"><label>Ciudad de residencia</label><input type="text"></div>
+      </div>
+
+      <h3>Vinculación laboral</h3>
+      <div class="form-grid">
+        <div class="field"><label>Empresa</label><input type="text" placeholder="Ej. Clínica Colsanitas"></div>
+        <div class="field"><label>Tipo de contrato</label>
+          <select><option>Seleccione…</option><option>Término indefinido</option><option>Término fijo</option><option>Obra o labor</option></select>
+        </div>
+      </div>
+
+      <h3>Documentos requeridos</h3>
+      <div class="upload-row">
+        <div class="upload-box"><div class="ic">🪪</div>Fotocopia de la cédula</div>
+        <div class="upload-box"><div class="ic">📄</div>Certificación laboral vigente</div>
+      </div>
+
+      <div class="cont-check" style="margin-top:24px;">
+        <input type="checkbox" id="terms">
+        <label for="terms">Acepto los términos y condiciones de la afiliación</label>
+      </div>
+      <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:8px;">Enviar solicitud de afiliación</button>
+    </form>
+  </div>
+</section>
+
+<div id="footer-placeholder"></div>
+<script src="assets/main.js"></script>
+</body>
+</html>

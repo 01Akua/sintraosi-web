@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SINTRAOSI — Sindicalismo de cara al futuro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* ---- paleta extraída del sitio real de SINTRAOSI ---- */
+    --rojo:#C62828;
+    --rojo-dark:#9E1F1F;
+    --rojo-tint:#FBEAEA;
+    --dorado:#C9A227;
+    --dorado-dark:#A3811A;
+    --bosque:#20321A;
+    --bosque-2:#2B4322;
+    --oliva:#5C8A3A;
+    --oliva-tint:#EEF4E7;
+    --papel:#FAF9F5;
+    --papel-2:#F1EFE6;
+    --linea: rgba(32,50,26,0.12);
+    --linea-clara: rgba(250,249,245,0.18);
+    --texto:#20241C;
+    --texto-mute:#5B6156;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--papel);
+    color:var(--texto);
+    font-family:'Inter', sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Poppins', sans-serif;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    line-height:1.15;
+  }
+  a{color:inherit; text-decoration:none;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 28px;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  /* ---------- SELLO — firma visual basada en el sello real (laurel + cinta) ---------- */
+  .sello{
+    --sc: var(--dorado);
+    display:inline-flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    position:relative;
+    flex-shrink:0;
+    background:
+      radial-gradient(circle at 50% 50%, transparent 58%, var(--sc) 59%, var(--sc) 63%, transparent 64%),
+      conic-gradient(from 0deg, var(--rojo) 0 8%, transparent 8% 12%, var(--rojo) 12% 20%, transparent 20% 24%, var(--rojo) 24% 32%, transparent 32% 36%, var(--rojo) 36% 44%, transparent 44% 48%, var(--rojo) 48% 56%, transparent 56% 60%, var(--rojo) 60% 68%, transparent 68% 72%, var(--rojo) 72% 80%, transparent 80% 84%, var(--rojo) 84% 92%, transparent 92% 96%, var(--rojo) 96% 100%);
+    border:1px solid var(--sc);
+  }
+  .sello .sello-core{
+    width:66%; height:66%; border-radius:50%;
+    background:var(--bosque);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Poppins'; font-weight:800; color:var(--papel);
+  }
+
+  /* ---------- HEADER ---------- */
+  header{
+    background:var(--bosque);
+    color:var(--papel);
+    position:sticky; top:0; z-index:50;
+    border-bottom:1px solid var(--linea-clara);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 28px;
+    max-width:1180px; margin:0 auto;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand .sello{width:40px; height:40px; font-size:0.6rem;}
+  .brand .sello .sello-core{font-size:0.62rem;}
+  .brand-name{font-family:'Poppins'; font-weight:800; font-size:1.05rem; letter-spacing:0.01em;}
+  .brand-sub{font-size:0.66rem; color:rgba(250,249,245,0.55); letter-spacing:0.03em;}
+  nav.links{display:flex; gap:26px; align-items:center;}
+  nav.links a{font-size:0.86rem; font-weight:500; color:rgba(250,249,245,0.82); transition:color .15s;}
+  nav.links a:hover{color:var(--dorado);}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:12px 22px;
+    font-size:0.86rem; font-weight:600;
+    border-radius:6px;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition: transform .12s ease, background .15s, box-shadow .15s;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn-primary{background:var(--rojo); color:#fff; box-shadow:0 6px 16px -6px rgba(198,40,40,0.55);}
+  .btn-primary:hover{background:var(--rojo-dark);}
+  .btn-ghost{border-color:rgba(250,249,245,0.3); color:var(--papel);}
+  .btn-ghost:hover{border-color:var(--dorado); color:var(--dorado);}
+  .btn-dark{background:var(--bosque); color:var(--papel);}
+  .btn-dark:hover{background:var(--bosque-2);}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    color:#fff;
+    padding:88px 0 0;
+    overflow:hidden;
+    background:
+      linear-gradient(120deg, rgba(32,50,26,0.94) 0%, rgba(32,50,26,0.80) 45%, rgba(32,50,26,0.55) 100%),
+      linear-gradient(135deg, #2B4322 0%, #20321A 60%, #17240F 100%);
+  }
+  .hero-grid{
+    display:grid; grid-template-columns:1.15fr 0.85fr; align-items:center; gap:40px;
+    padding-bottom:0;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:0.74rem; letter-spacing:0.07em; text-transform:uppercase;
+    color:var(--dorado);
+    border:1px solid rgba(201,162,39,0.45);
+    background:rgba(201,162,39,0.08);
+    padding:6px 14px 6px 8px;
+    border-radius:999px;
+    margin-bottom:24px;
+  }
+  .eyebrow .sello{width:24px; height:24px; font-size:0.32rem;}
+  .hero h1{
+    font-size:clamp(2.1rem, 4vw, 3.15rem);
+    max-width:640px;
+  }
+  .hero h1 em{font-style:normal; color:var(--dorado);}
+  .hero p.lede{
+    max-width:520px; margin-top:20px;
+    font-size:1.05rem; color:rgba(250,249,245,0.8);
+  }
+  .hero-cta{display:flex; gap:14px; margin-top:32px; flex-wrap:wrap;}
+  .hero-visual{
+    position:relative;
+    height:420px;
+    border-radius:14px 14px 0 0;
+    background:
+      linear-gradient(160deg, rgba(198,40,40,0.28), rgba(201,162,39,0.22)),
+      linear-gradient(200deg, #33502A, #17240F);
+    display:flex; align-items:flex-end; justify-content:center;
+    overflow:hidden;
+  }
+  .hero-visual::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.06) 0, transparent 40%),
+                       repeating-linear-gradient(115deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 26px);
+  }
+  .hero-visual .sello{
+    width:150px; height:150px; font-size:1.4rem;
+    margin-bottom:-40px;
+    box-shadow:0 20px 50px -12px rgba(0,0,0,0.5);
+  }
+  .hero-visual .sello .sello-core{font-size:1.5rem;}
+
+  .hero-stats{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--linea-clara);
+    margin-top:52px; padding:26px 0;
+  }
+  .stat .num{font-family:'Poppins'; font-size:1.6rem; font-weight:700; color:var(--dorado);}
+  .stat .label{font-size:0.75rem; color:rgba(250,249,245,0.6); margin-top:4px; line-height:1.3;}
+
+  /* ---------- SECTION shared ---------- */
+  section{padding:76px 0;}
+  .section-head{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:38px; gap:24px; flex-wrap:wrap;}
+  .section-tag{font-family:'IBM Plex Mono'; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.09em; color:var(--rojo); margin-bottom:10px; display:block; font-weight:600;}
+  .section-head h2{font-size:1.85rem;}
+  .section-head p{color:var(--texto-mute); max-width:460px; font-size:0.95rem;}
+
+  /* ---------- ALERTAS / CASOS ---------- */
+  .alertas{
+    background:linear-gradient(120deg, var(--oliva-tint) 0%, var(--papel-2) 100%);
+    border-top:1px solid var(--linea); border-bottom:1px solid var(--linea);
+  }
+  .case-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px;}
+  .case-card{
+    background:#fff; border:1px solid var(--linea); border-radius:10px;
+    padding:22px; position:relative;
+    box-shadow:0 1px 2px rgba(32,50,26,0.04);
+    transition: box-shadow .15s, transform .15s;
+  }
+  .case-card:hover{box-shadow:0 10px 24px -10px rgba(32,50,26,0.18); transform:translateY(-2px);}
+  .case-status{
+    position:absolute; top:18px; right:18px;
+    font-family:'IBM Plex Mono'; font-size:0.6rem; letter-spacing:0.07em;
+    padding:5px 10px; border-radius:20px; text-transform:uppercase; font-weight:600;
+  }
+  .status-activo{background:var(--rojo-tint); color:var(--rojo-dark); border:1px solid rgba(198,40,40,0.3);}
+  .status-proceso{background:rgba(201,162,39,0.12); color:var(--dorado-dark); border:1px solid rgba(201,162,39,0.4);}
+  .status-resuelto{background:var(--oliva-tint); color:var(--oliva); border:1px solid rgba(92,138,58,0.35);}
+  .case-card .region{font-family:'IBM Plex Mono'; font-size:0.7rem; color:#8a8f83; text-transform:uppercase; letter-spacing:0.05em;}
+  .case-card h3{font-family:'Poppins'; font-weight:600; font-size:1.02rem; margin:10px 0 8px; max-width:82%; line-height:1.35;}
+  .case-card p{font-size:0.86rem; color:var(--texto-mute); margin-bottom:14px;}
+  .case-card .read{font-size:0.82rem; font-weight:600; color:var(--bosque); border-bottom:1px solid var(--bosque);}
+
+  /* ---------- BENEFICIOS ---------- */
+  .beneficios{
+    background: linear-gradient(115deg, #6FA83D 0%, #3E6A28 55%, #20321A 100%);
+    color:#fff;
+  }
+  .beneficios .section-tag{color:var(--dorado);}
+  .beneficios .section-head p{color:rgba(255,255,255,0.75);}
+  .beneficios .section-head h2{color:#fff;}
+  .benefit-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:18px;}
+  .benefit-card{
+    padding:26px 22px; border-radius:10px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.14);
+    backdrop-filter: blur(2px);
+  }
+  .benefit-num{font-family:'IBM Plex Mono'; font-size:0.78rem; color:var(--dorado); font-weight:600;}
+  .benefit-card h3{font-family:'Poppins'; font-size:1rem; font-weight:600; margin:12px 0 8px; color:#fff;}
+  .benefit-card p{font-size:0.86rem; color:rgba(255,255,255,0.8);}
+
+  /* ---------- TESTIMONIOS ---------- */
+  .testimonios{background:var(--papel);}
+  .testi-grid{display:grid; grid-template-columns:1.1fr 1fr; gap:40px; align-items:center;}
+  .testi-quote{position:relative; padding-left:28px; border-left:3px solid var(--rojo);}
+  .testi-quote p{font-family:'Poppins'; font-size:1.35rem; line-height:1.4; color:var(--texto); font-weight:600;}
+  .testi-meta{display:flex; align-items:center; gap:14px; margin-top:24px;}
+  .testi-meta .sello{width:46px; height:46px; font-size:0.4rem;}
+  .testi-meta .sello .sello-core{font-size:0.42rem;}
+  .testi-meta .who{font-size:0.86rem;}
+  .testi-meta .who .role{color:var(--texto-mute); font-size:0.78rem;}
+  .testi-side{display:flex; flex-direction:column; gap:16px;}
+  .mini-testi{background:#fff; border:1px solid var(--linea); border-radius:10px; padding:18px 20px; box-shadow:0 1px 2px rgba(32,50,26,0.04);}
+  .mini-testi p{font-size:0.87rem; color:var(--texto);}
+  .mini-testi .who{font-family:'IBM Plex Mono'; font-size:0.7rem; color:var(--rojo); margin-top:8px;}
+
+  /* ---------- DOCUMENTOS ---------- */
+  .doc-toolbar{display:flex; gap:10px; margin-bottom:26px; flex-wrap:wrap;}
+  .doc-toolbar input{
+    flex:1; min-width:220px;
+    padding:12px 16px; border:1px solid var(--linea); border-radius:6px;
+    font-family:'Inter'; font-size:0.9rem; background:#fff;
+  }
+  .doc-toolbar select{
+    padding:12px 14px; border:1px solid var(--linea); border-radius:6px;
+    font-family:'Inter'; font-size:0.9rem; background:#fff;
+  }
+  .doc-list{display:flex; flex-direction:column; border:1px solid var(--linea); border-radius:10px; overflow:hidden; background:#fff;}
+  .doc-row{
+    display:grid; grid-template-columns:44px 1fr auto auto;
+    align-items:center; gap:16px;
+    padding:16px 20px;
+    border-bottom:1px solid var(--linea);
+  }
+  .doc-row:last-child{border-bottom:none;}
+  .doc-icon{
+    width:38px; height:38px; border-radius:7px;
+    background:var(--rojo-tint); color:var(--rojo-dark);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono'; font-size:0.6rem; font-weight:700;
+  }
+  .doc-name{font-size:0.92rem; font-weight:600;}
+  .doc-meta{font-size:0.78rem; color:var(--texto-mute); margin-top:2px;}
+  .doc-verified{font-family:'IBM Plex Mono'; font-size:0.65rem; color:var(--oliva); display:flex; align-items:center; gap:6px; letter-spacing:0.03em;}
+  .doc-dl{font-size:0.82rem; font-weight:600; color:var(--bosque); white-space:nowrap; border:1px solid var(--linea); padding:8px 14px; border-radius:6px;}
+  .doc-dl:hover{background:var(--papel-2);}
+
+  /* ---------- REGIONALES ---------- */
+  .regionales{background:var(--papel-2); border-top:1px solid var(--linea); border-bottom:1px solid var(--linea);}
+  .reg-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  .reg-card{
+    background:#fff; border:1px solid var(--linea); border-radius:10px; padding:20px;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .reg-city{font-family:'Poppins'; font-weight:700; font-size:1.05rem;}
+  .reg-count{font-family:'IBM Plex Mono'; font-size:0.74rem; color:var(--rojo);}
+  .reg-link{font-size:0.8rem; font-weight:600; margin-top:8px; border-bottom:1px solid var(--bosque); align-self:flex-start;}
+
+  /* ---------- ALIADOS ---------- */
+  .aliados{padding:44px 0; border-top:1px solid var(--linea);}
+  .aliados-row{display:flex; gap:36px; align-items:center; justify-content:center; flex-wrap:wrap; opacity:0.8;}
+  .aliado{font-family:'IBM Plex Mono'; font-size:0.78rem; color:var(--texto-mute); border:1px dashed var(--linea); padding:10px 16px; border-radius:8px;}
+
+  /* ---------- CTA FINAL ---------- */
+  .cta-final{
+    background:linear-gradient(120deg, var(--rojo) 0%, var(--rojo-dark) 100%);
+    color:#fff; text-align:center; padding:68px 0;
+  }
+  .cta-final h2{font-size:2rem; max-width:640px; margin:0 auto 14px; color:#fff;}
+  .cta-final p{max-width:480px; margin:0 auto 30px; color:rgba(255,255,255,0.85);}
+  .cta-final .btn-dark{padding:14px 28px; font-size:0.92rem;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--bosque); color:rgba(250,249,245,0.7); padding:50px 0 26px;}
+  .foot-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:32px; padding-bottom:36px; border-bottom:1px solid var(--linea-clara);}
+  .foot-grid h4{font-family:'IBM Plex Mono'; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.07em; color:var(--dorado); margin-bottom:14px;}
+  .foot-grid a, .foot-grid p{font-size:0.86rem; display:block; margin-bottom:9px; color:rgba(250,249,245,0.68);}
+  .foot-grid a:hover{color:#fff;}
+  .foot-bottom{display:flex; justify-content:space-between; padding-top:22px; font-size:0.76rem; flex-wrap:wrap; gap:10px;}
+
+  @media (max-width:900px){
+    nav.links{display:none;}
+    .hero-grid{grid-template-columns:1fr;}
+    .hero-visual{display:none;}
+    .hero-stats{grid-template-columns:repeat(2,1fr); row-gap:20px;}
+    .case-grid, .benefit-grid, .reg-grid{grid-template-columns:repeat(2,1fr);}
+    .testi-grid{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr 1fr;}
+    .doc-row{grid-template-columns:36px 1fr; row-gap:8px;}
+    .doc-verified, .doc-dl{grid-column:2;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand">
+      <div class="sello"><div class="sello-core">S</div></div>
+      <div>
+        <div class="brand-name">SINTRAOSI</div>
+        <div class="brand-sub">Organización Sanitas Internacional · desde 2012</div>
+      </div>
+    </div>
+    <nav class="links">
+      <a href="#alertas">En la lucha</a>
+      <a href="#beneficios">Beneficios</a>
+      <a href="#documentos">Documentos</a>
+      <a href="#regionales">Regionales</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <a href="#afiliate" class="btn btn-primary">Afiliarse</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow"><span class="sello"><span class="sello-core"></span></span> Sindicato de primer grado · CGT · UNI Global Union</div>
+        <h1>Sindicalismo <em>de cara al futuro.</em></h1>
+        <p class="lede">SINTRAOSI representa a los trabajadores del grupo empresarial Keralty / Sanitas en todo el país. Defendemos condiciones laborales dignas, contratación justa y el respeto a quienes sostienen el sistema de salud.</p>
+        <div class="hero-cta">
+          <a href="#afiliate" class="btn btn-primary">Quiero afiliarme</a>
+          <a href="#documentos" class="btn btn-ghost">Consultar convención colectiva →</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="sello"><div class="sello-core">SNTL</div></div>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="num">12</div><div class="label">Regionales activas en el país</div></div>
+      <div class="stat"><div class="num">2012</div><div class="label">Año de fundación</div></div>
+      <div class="stat"><div class="num">+800</div><div class="label">Trabajadores afiliados</div></div>
+      <div class="stat"><div class="num">CGT</div><div class="label">Confederación General del Trabajo</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="alertas" id="alertas">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="section-tag">En la lucha ahora</span>
+        <h2>Casos y denuncias activas</h2>
+      </div>
+      <p>Seguimiento público al estado de cada denuncia radicada por el sindicato ante la empresa y los entes de control.</p>
+    </div>
+    <div class="case-grid">
+      <div class="case-card">
+        <span class="case-status status-activo">Activo</span>
+        <div class="region">Regional Cali</div>
+        <h3>Solicitud de intervención a la Defensoría del Pueblo</h3>
+        <p>Denuncia por instalación indebida de cámaras en zonas de vestier del personal en Clínica Sebastián de Belalcázar.</p>
+        <a href="#" class="read">Ver seguimiento →</a>
+      </div>
+      <div class="case-card">
+        <span class="case-status status-proceso">En proceso</span>
+        <div class="region">Regional Caribe</div>
+        <h3>Reintegro y levantamiento de fuero sindical</h3>
+        <p>Proceso ante juez laboral tras despido del presidente de la regional Barranquilla.</p>
+        <a href="#" class="read">Ver seguimiento →</a>
+      </div>
+      <div class="case-card">
+        <span class="case-status status-resuelto">Resuelto</span>
+        <div class="region">Nacional</div>
+        <h3>Mesa de diálogo por armonización salarial</h3>
+        <p>Acuerdo alcanzado para equiparar salarios entre sedes por el mismo cargo desempeñado.</p>
+        <a href="#" class="read">Ver acuerdo →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="beneficios" id="beneficios">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="section-tag">Por qué afiliarte</span>
+        <h2>Lo que gana un trabajador organizado</h2>
+      </div>
+      <p>La afiliación es confidencial y está protegida por fuero sindical desde el momento de tu ingreso.</p>
+    </div>
+    <div class="benefit-grid">
+      <div class="benefit-card">
+        <div class="benefit-num">01</div>
+        <h3>Representación legal</h3>
+        <p>Acompañamiento jurídico gratuito en procesos laborales y disciplinarios frente a la empresa.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-num">02</div>
+        <h3>Negociación colectiva</h3>
+        <p>Acceso directo a los beneficios pactados en la convención colectiva vigente.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-num">03</div>
+        <h3>Protección ante despido</h3>
+        <p>Fuero sindical y respaldo del sindicato ante procesos de desvinculación irregular.</p>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-num">04</div>
+        <h3>Canal directo de denuncia</h3>
+        <p>Reporta condiciones laborales indebidas de forma confidencial y con seguimiento visible.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="testimonios">
+  <div class="wrap">
+    <div class="testi-grid">
+      <div class="testi-quote">
+        <p>"Cuando la empresa levantó mi fuero, el sindicato fue el único que estuvo ahí desde el primer día."</p>
+        <div class="testi-meta">
+          <div class="sello"><div class="sello-core">SNTL</div></div>
+          <div class="who">Laureano R.<br><span class="role">Ex presidente, Regional Barranquilla</span></div>
+        </div>
+      </div>
+      <div class="testi-side">
+        <div class="mini-testi">
+          <p>"Afiliarme me dio información real sobre mis derechos que la empresa nunca me explicó."</p>
+          <div class="who">— Auxiliar de enfermería, Bogotá</div>
+        </div>
+        <div class="mini-testi">
+          <p>"El acompañamiento en la mesa de diálogo mensual cambió cómo nos escuchan."</p>
+          <div class="who">— Personal administrativo, Cali</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="documentos">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="section-tag">Transparencia</span>
+        <h2>Documentos y recursos</h2>
+      </div>
+      <p>Convención colectiva, estatutos y actas oficiales, verificados por la junta directiva nacional.</p>
+    </div>
+    <div class="doc-toolbar">
+      <input type="text" placeholder="Buscar documento — ej. convención colectiva 2024">
+      <select>
+        <option>Todas las categorías</option>
+        <option>Convención colectiva</option>
+        <option>Estatutos</option>
+        <option>Actas</option>
+      </select>
+    </div>
+    <div class="doc-list">
+      <div class="doc-row">
+        <div class="doc-icon">PDF</div>
+        <div>
+          <div class="doc-name">Convención Colectiva SINTRAOSI – Keralty 2024–2027</div>
+          <div class="doc-meta">Actualizado 12 mar 2026 · 84 páginas</div>
+        </div>
+        <div class="doc-verified">✓ Verificado</div>
+        <a href="#" class="doc-dl">Descargar</a>
+      </div>
+      <div class="doc-row">
+        <div class="doc-icon">PDF</div>
+        <div>
+          <div class="doc-name">Estatutos del sindicato</div>
+          <div class="doc-meta">Actualizado 3 ene 2025 · 22 páginas</div>
+        </div>
+        <div class="doc-verified">✓ Verificado</div>
+        <a href="#" class="doc-dl">Descargar</a>
+      </div>
+      <div class="doc-row">
+        <div class="doc-icon">PDF</div>
+        <div>
+          <div class="doc-name">Acta Asamblea General 2025</div>
+          <div class="doc-meta">Publicado 28 nov 2025 · 6 páginas</div>
+        </div>
+        <div class="doc-verified">✓ Verificado</div>
+        <a href="#" class="doc-dl">Descargar</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="regionales" id="regionales">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="section-tag">Presencia nacional</span>
+        <h2>Encuentra tu regional</h2>
+      </div>
+      <p>Cada regional tiene junta propia, cartelera informativa y comité de relaciones laborales.</p>
+    </div>
+    <div class="reg-grid">
+      <div class="reg-card">
+        <div class="reg-city">Bogotá</div>
+        <div class="reg-count">Sede nacional</div>
+        <a href="#" class="reg-link">Ver regional →</a>
+      </div>
+      <div class="reg-card">
+        <div class="reg-city">Cali</div>
+        <div class="reg-count">1 caso activo</div>
+        <a href="#" class="reg-link">Ver regional →</a>
+      </div>
+      <div class="reg-card">
+        <div class="reg-city">Barranquilla</div>
+        <div class="reg-count">Regional Caribe</div>
+        <a href="#" class="reg-link">Ver regional →</a>
+      </div>
+      <div class="reg-card">
+        <div class="reg-city">Medellín</div>
+        <div class="reg-count">Junta activa</div>
+        <a href="#" class="reg-link">Ver regional →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="aliados">
+  <div class="wrap aliados-row">
+    <span class="aliado">UNI Global Union</span>
+    <span class="aliado">CGT · Confederación General del Trabajo</span>
+    <span class="aliado">Ministerio del Trabajo</span>
+  </div>
+</div>
+
+<section class="cta-final" id="afiliate">
+  <div class="wrap">
+    <h2>Tu afiliación es confidencial y te protege desde el primer día.</h2>
+    <p>Completa el formulario y un delegado de tu regional te contactará en menos de 48 horas.</p>
+    <a href="#" class="btn btn-dark">Iniciar afiliación</a>
+  </div>
+</section>
+
+<footer id="contacto">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <h4>SINTRAOSI</h4>
+        <p style="color:rgba(250,249,245,0.55); font-size:0.82rem; max-width:280px;">Sindicato de Trabajadores de la Organización Sanitas Internacional. Afiliado a la Confederación General del Trabajo (CGT) y a UNI Global Union.</p>
+      </div>
+      <div>
+        <h4>Sindicato</h4>
+        <a href="#">Quiénes somos</a>
+        <a href="#">Junta directiva</a>
+        <a href="#">Historia</a>
+      </div>
+      <div>
+        <h4>Recursos</h4>
+        <a href="#">Documentos</a>
+        <a href="#">Regionales</a>
+        <a href="#">Preguntas frecuentes</a>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <a href="#">Radicar denuncia</a>
+        <a href="#">Formulario de afiliación</a>
+        <a href="#">contacto@sintraosi.org</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 SINTRAOSI — Organización sindical de primer grado.</span>
+      <span>NIT 900.XXX.XXX-X · Personería jurídica vigente</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
