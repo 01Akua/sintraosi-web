@@ -6,8 +6,20 @@
 ## Descripción
 Cliente Korve. Rediseño exponencial del sitio web del sindicato SINTRAOSI (Sindicato de Trabajadores de la Organización Sanitas Internacional). Sitio real: https://www.sintraosi.org/
 
+## Publicado
+- Repo: https://github.com/01Akua/sintraosi-web (público)
+- Live (GitHub Pages): **https://01akua.github.io/sintraosi-web/**
+- Rama `main`, GitHub Pages sirviendo desde la raíz (`/`). Todo el sitio usa rutas relativas, así que funciona bien bajo el subpath `/sintraosi-web/`.
+
+## Mobile / responsive
+- Verificado con emulación de viewport angosto (iframe 375–414px de ancho) en Inicio, Regionales, Junta Directiva y Afíliate: menú hamburguesa, dropdown de Nosotros, grids colapsando a 1 columna, formulario largo apilado — todo funciona.
+- Bugs reales encontrados y corregidos:
+  - `regionales.html` tenía `style="grid-template-columns:repeat(3,1fr)"` **inline**, que por especificidad CSS ignoraba las media queries y dejaba 3 columnas fijas en cualquier tamaño de pantalla. Se movió a una clase `.reg-grid-3` en `styles.css` con sus propios overrides dentro de los `@media`.
+  - El correo largo en el footer (`presidencia.nacional@sintraosi.org`) se cortaba en pantallas angostas por falta de salto de línea. Se agregó `overflow-wrap:break-word` global en `body` + `overflow-wrap:anywhere` en los links del footer.
+  - Se agregó un breakpoint extra `@media (max-width:480px)` para achicar el header (oculta el subtítulo bajo el logo, reduce paddings) en teléfonos muy angostos.
+
 ## Estado actual
-- Fase: **sitio multipágina (v4) construido y verificado en navegador.** Cada sección relevante tiene su propia URL, como un sitio institucional real — ya no es una landing de una sola página. Listo para mostrar al cliente.
+- Fase: **sitio multipágina (v4) construido, verificado en navegador y publicado en producción.** Cada sección relevante tiene su propia URL, como un sitio institucional real — ya no es una landing de una sola página. Listo para mostrarle el link al cliente.
 - Done:
   - `sintraosi-v2.html` y `sintraosi-v3.html` — versiones anteriores de una sola página (landing). Se conservan como referencia histórica; **ya no son el archivo de trabajo principal.**
   - `contenido-real.md` — extracción completa (navegador) de https://www.sintraosi.org/: home, Nosotros (misión/visión/historia/junta directiva/principios/valores), Contacto, Noticias (5 items), Galería, Estados financieros, formulario de Afíliate.
