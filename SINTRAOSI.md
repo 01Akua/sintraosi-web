@@ -1,5 +1,5 @@
 <!-- SINTRAOSI.md — rediseño web para el sindicato SINTRAOSI -->
-<!-- last_updated: 2026-08-29 | status: activo -->
+<!-- last_updated: 2026-09-08 | status: activo -->
 
 # SINTRAOSI — Rediseño web
 
@@ -40,12 +40,14 @@ Cliente Korve. Rediseño exponencial del sitio web del sindicato SINTRAOSI (Sind
   - `assets/logo-sintraosi.png` — isotipo real del sindicato (globo + laurel + cinta "SINTRAOSI since 2012").
   - `assets/foto-1.jpg` a `foto-8.jpg` — 8 fotos reales del sindicato, distribuidas por las distintas páginas (hero, Quiénes somos, Historia, Junta Directiva, Galería completa, banda de Aliados).
   - Redes reales confirmadas por las fotos: sintraosi.org, Facebook "Sintraosi Oficial", X/Twitter "@Sintraosi_ofic" — en el footer y en Contacto.
+  - `assets/logo-csi.png`, `logo-uni-global-union.png`, `logo-cut.png`, `logo-mintrabajo.png` — logos reales de aliados (recortados automáticamente de una imagen combinada que envió el usuario), reemplazan los badges de texto en la banda de Aliados del Inicio. Se muestran en tarjetas blancas sobre el fondo verde.
+  - **Tipografía cambiada de Poppins a Fraunces** (serif) para todos los encabezados en las 10 páginas — look más editorial/institucional, menos genérico. Cuerpo sigue en Inter, etiquetas/mono en IBM Plex Mono.
+  - Foto de fondo del hero de Inicio aclarada: overlay oscuro reducido + `filter: brightness(1.18) saturate(1.12)` sobre la imagen.
 - Pendiente:
   1. Completar Noticias/Galería si el cliente confirma que hay más ítems detrás del "Cargar más" / "Ver todas" del sitio real.
   2. Conseguir las URLs reales de Facebook/X para los íconos del footer (hoy apuntan a "#").
-  3. Revisar responsive / mobile a fondo en dispositivo real.
-  4. Conectar los formularios (contacto/afiliación) a un backend o servicio real cuando pase de prototipo a producción.
-  5. El sitio usa `fetch()` para los partials — necesita servirse desde un servidor local (no funciona abriendo el `.html` directo con `file://`). Al pasar a producción con hosting real esto no es un problema.
+  3. Conectar los formularios (contacto/afiliación) a un backend o servicio real cuando pase de prototipo a producción.
+  4. El sitio usa `fetch()` para los partials — necesita servirse desde un servidor local (no funciona abriendo el `.html` directo con `file://`). Al pasar a producción con hosting real (GitHub Pages ya lo hace) esto no es un problema.
 
 ## Alcance del proyecto
 - Es un **prototipo** (no producción todavía) para mostrarle al cliente una versión muy superior a la actual.
@@ -59,6 +61,10 @@ Cliente Korve. Rediseño exponencial del sitio web del sindicato SINTRAOSI (Sind
 - [2026-08-29] Migración de landing de una página (v2/v3) a sitio multipágina — El usuario señaló que no es una landing sino la web completa de una organización sindical, y cada sección relevante (Nosotros, Historia, Junta Directiva, Noticias, Regionales, Galería, Documentos, Contacto, Afíliate) debía tener su propia subpágina para verse formal y organizado, como un sitio institucional real.
 - [2026-08-29] Paleta cambiada de azul a verde bosque (laurel) + rojo (cinta) — El usuario no quería la paleta azul y pidió usar los colores reales de identidad del logo (globo/laurel verde + cinta roja "SINTRAOSI"). Verde bosque pasó a ser el color dominante (headers, fondos oscuros); rojo quedó reservado para CTA/acciones (botones, checkmarks).
 - [2026-08-29] Header pasó de sólido a transparente con blur (`backdrop-filter`), position:fixed sobre el hero/page-hero, y solo gana fondo sólido verde al hacer scroll (clase `.scrolled` ya existente) — El usuario pidió que la barra superior se integrara con la página en vez de verse como un bloque separado.
+- [2026-08-29] Repo público `01Akua/sintraosi-web` creado y publicado en GitHub Pages — El usuario pidió tener el sitio en un repo de GitHub con link público para mostrarle al cliente. Commits sin coautoría (pedido explícito del usuario).
+- [2026-08-29] Bugs de responsive corregidos tras auditoría dedicada: grid con estilo inline en `regionales.html` que ignoraba media queries, y overflow de emails largos en el footer — Ver sección "Mobile / responsive" arriba para el detalle técnico.
+- [2026-09-08] Badges de texto de Aliados reemplazados por logos reales (CSI, UNI Global Union, CUT, Mintrabajo) — El usuario envió los logos reales y pidió usarlos en vez de texto plano.
+- [2026-09-08] Tipografía de encabezados cambiada de Poppins a Fraunces (serif) + foto del hero aclarada — El usuario pidió una tipografía "mucho más agradable" (Poppins se sentía genérica) y que la imagen de portada se viera menos oscura.
 
 ## Notas
 - **Archivo de entrada actual: `index.html`** (requiere servidor local por el uso de `fetch()` para los partials — usar `python3 -m http.server` en la carpeta del proyecto, no abrir con doble clic).
