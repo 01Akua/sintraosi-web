@@ -6,6 +6,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut,
+  createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore, collection, doc, getDocs, getDoc, setDoc, deleteDoc,
@@ -88,6 +89,83 @@ onAuthStateChanged(auth, async (user) => {
   $("appShell").hidden = false;
   $("userEmailLabel").textContent = user.email;
   await cargarTodo();
+});
+
+// ---- Vistas de la pantalla de login (iniciar / crear cuenta / olvidé) ----
+function mostrarVistaLogin(vista) {
+  ["vistaLogin", "vistaCrearCuenta", "vistaOlvide"].forEach((v) => { $(v).hidden = v !== vista; });
+}
+$("irCrearCuentaBtn").addEventListener("click", () => mostrarVistaLogin("vistaCrearCuenta"));
+$("irOlvideBtn").addEventListener("click", () => mostrarVistaLogin("vistaOlvide"));
+$("volverLoginDesdeCrearBtn").addEventListener("click", () => mostrarVistaLogin("vistaLogin"));
+$("volverLoginDesdeOlvideBtn").addEventListener("click", () => mostrarVistaLogin("vistaLogin"));
+
+// ---- Crear cuenta (autoservicio): requiere que un admin ya haya autorizado el correo ----
+$("crearCuentaForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("crearCuentaError");
+  const ok = $("crearCuentaOk");
+  err.hidden = true;
+  ok.hidden = true;
+
+  const email = $("cc_email").value.trim().toLowerCase();
+  const password = $("cc_password").value;
+  const btn = $("crearCuentaBtn");
+  btn.disabled = true;
+  btn.textContent = "Verificando autorización…";
+  try {
+    const autorizado = await getDoc(doc(db, "admins", email));
+    if (!autorizado.exists()) {
+      err.textContent = "Ese correo no ha sido autorizado todavía. Pide a un miembro de junta directiva que te dé acceso desde el panel (pestaña Usuarios del panel).";
+      err.hidden = false;
+      return;
+    }
+    btn.textContent = "Creando cuenta…";
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    await sendEmailVerification(cred.user).catch(() => {});
+    ok.textContent = "Cuenta creada. Te enviamos un correo de verificación. Ya puedes usar el panel.";
+    ok.hidden = false;
+    $("crearCuentaForm").reset();
+    // onAuthStateChanged ya detecta la sesión iniciada y abre el panel solo.
+  } catch (e2) {
+    if (e2.code === "auth/email-already-in-use") {
+      err.textContent = "Ya existe una cuenta con este correo. Usa \"¿Olvidaste tu contraseña?\" si no la recuerdas.";
+    } else if (e2.code === "auth/weak-password") {
+      err.textContent = "La contraseña debe tener al menos 6 caracteres.";
+    } else {
+      err.textContent = "No se pudo crear la cuenta. Intenta de nuevo.";
+    }
+    err.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Crear cuenta";
+  }
+});
+
+// ---- Olvidé mi contraseña ----
+$("olvideForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("olvideError");
+  const ok = $("olvideOk");
+  err.hidden = true;
+  ok.hidden = true;
+  const email = $("ol_email").value.trim();
+  const btn = $("olvideBtn");
+  btn.disabled = true;
+  btn.textContent = "Enviando…";
+  try {
+    await sendPasswordResetEmail(auth, email);
+    ok.textContent = "Si ese correo tiene una cuenta, te llegará un enlace para elegir una contraseña nueva.";
+    ok.hidden = false;
+    $("olvideForm").reset();
+  } catch (e2) {
+    // No revelar si el correo existe o no (evita enumeración de cuentas).
+    ok.textContent = "Si ese correo tiene una cuenta, te llegará un enlace para elegir una contraseña nueva.";
+    ok.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Enviar enlace";
+  }
 });
 
 // ---------------------------------------------------------------------------

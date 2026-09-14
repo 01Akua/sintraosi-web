@@ -29,10 +29,18 @@ service cloud.firestore {
     }
 
     // admins/{email en minúsculas}: { email, nombre, rol, creado_en, creado_por }
-    // Solo un admin existente puede leer la lista / dar de alta a otros. Un admin
-    // no se puede borrar a sí mismo (evita quedarse sin acceso por accidente).
+    // Un admin existente da de alta el email de un nuevo admin (allow create);
+    // eso es solo la "autorización" -- la cuenta de login (Firebase Auth) se la
+    // crea la propia persona autorizada desde la pantalla de login, sin tocar
+    // la consola de Firebase.
+    //
+    // "get" (leer UN documento puntual) es público: así la pantalla de "crear
+    // mi cuenta" puede confirmar "sí, mi correo fue autorizado" antes de dejar
+    // crear la contraseña, sin exponer la lista completa de admins a cualquiera.
+    // "list" (la colección completa) sigue siendo solo para admins.
     match /admins/{email} {
-      allow read: if esAdmin();
+      allow get: if true;
+      allow list: if esAdmin();
       allow create, update: if esAdmin();
       allow delete: if esAdmin() && email != request.auth.token.email.lower();
     }

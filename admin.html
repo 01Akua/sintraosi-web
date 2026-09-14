@@ -18,18 +18,65 @@
     <img src="assets/logo-sintraosi.png" alt="SINTRAOSI">
     <h1>Panel de Afiliados</h1>
     <p class="sub">Acceso exclusivo para junta directiva</p>
-    <div id="loginError" class="admin-error" hidden></div>
-    <form id="loginForm">
-      <div class="admin-field">
-        <label for="loginEmail">Correo</label>
-        <input type="email" id="loginEmail" required autocomplete="username">
+
+    <!-- Vista: iniciar sesión -->
+    <div id="vistaLogin">
+      <div id="loginError" class="admin-error" hidden></div>
+      <div id="loginOk" class="admin-ok" hidden></div>
+      <form id="loginForm">
+        <div class="admin-field">
+          <label for="loginEmail">Correo</label>
+          <input type="email" id="loginEmail" required autocomplete="username">
+        </div>
+        <div class="admin-field">
+          <label for="loginPassword">Contraseña</label>
+          <input type="password" id="loginPassword" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn-primary" id="loginBtn">Iniciar sesión</button>
+      </form>
+      <div class="login-links">
+        <button type="button" class="link-btn" id="irCrearCuentaBtn">¿Te dieron acceso pero no tienes cuenta? Créala aquí</button>
+        <button type="button" class="link-btn" id="irOlvideBtn">¿Olvidaste tu contraseña?</button>
       </div>
-      <div class="admin-field">
-        <label for="loginPassword">Contraseña</label>
-        <input type="password" id="loginPassword" required autocomplete="current-password">
+    </div>
+
+    <!-- Vista: crear cuenta (requiere que un admin ya haya autorizado el correo) -->
+    <div id="vistaCrearCuenta" hidden>
+      <p class="sub" style="margin-bottom:16px;">Un miembro de junta directiva debe haber autorizado tu correo primero. Escríbelo para confirmar y crear tu contraseña.</p>
+      <div id="crearCuentaError" class="admin-error" hidden></div>
+      <div id="crearCuentaOk" class="admin-ok" hidden></div>
+      <form id="crearCuentaForm">
+        <div class="admin-field">
+          <label for="cc_email">Correo autorizado</label>
+          <input type="email" id="cc_email" required autocomplete="username">
+        </div>
+        <div class="admin-field">
+          <label for="cc_password">Elige una contraseña</label>
+          <input type="password" id="cc_password" required minlength="6" autocomplete="new-password">
+        </div>
+        <button type="submit" class="btn-primary" id="crearCuentaBtn">Crear cuenta</button>
+      </form>
+      <div class="login-links">
+        <button type="button" class="link-btn" id="volverLoginDesdeCrearBtn">← Volver a iniciar sesión</button>
       </div>
-      <button type="submit" class="btn-primary" id="loginBtn">Iniciar sesión</button>
-    </form>
+    </div>
+
+    <!-- Vista: olvidé mi contraseña -->
+    <div id="vistaOlvide" hidden>
+      <p class="sub" style="margin-bottom:16px;">Te enviamos un enlace a tu correo para elegir una contraseña nueva.</p>
+      <div id="olvideError" class="admin-error" hidden></div>
+      <div id="olvideOk" class="admin-ok" hidden></div>
+      <form id="olvideForm">
+        <div class="admin-field">
+          <label for="ol_email">Correo</label>
+          <input type="email" id="ol_email" required autocomplete="username">
+        </div>
+        <button type="submit" class="btn-primary" id="olvideBtn">Enviar enlace</button>
+      </form>
+      <div class="login-links">
+        <button type="button" class="link-btn" id="volverLoginDesdeOlvideBtn">← Volver a iniciar sesión</button>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -213,9 +260,10 @@
     <!-- ---- TAB: usuarios ---- -->
     <section id="tab-usuarios" hidden>
       <p style="max-width:640px; color:var(--texto-mute); font-size:0.88rem; margin-bottom:16px;">
-        Para dar acceso a un nuevo miembro de junta directiva: primero crea su cuenta en
-        <strong>Firebase Console → Authentication → Add user</strong> (email + contraseña temporal),
-        y luego agrégalo aquí con el mismo correo para habilitarle el acceso al panel.
+        Para dar acceso a un nuevo miembro de junta directiva: agrega su correo aquí abajo, y luego
+        dile que entre al panel y use <strong>"¿Te dieron acceso pero no tienes cuenta? Créala aquí"</strong>
+        en la pantalla de inicio de sesión — ahí mismo elige su propia contraseña, sin que nadie más
+        la vea ni tengas que crear nada en la consola de Firebase.
       </p>
       <div class="filters-bar">
         <input type="email" id="newAdminEmail" placeholder="correo@ejemplo.com" style="flex:1; min-width:220px; padding:10px 14px; border:1px solid var(--linea); border-radius:8px;">
