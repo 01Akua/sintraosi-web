@@ -9,7 +9,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {
   getFirestore, collection, doc, getDocs, getDoc, setDoc, deleteDoc,
-  serverTimestamp,
+  serverTimestamp, query, where,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
 const app = initializeApp(window.SINTRAOSI_FIREBASE_CONFIG);
@@ -94,18 +94,23 @@ onAuthStateChanged(auth, async (user) => {
 // Tabs
 // ---------------------------------------------------------------------------
 let CONTENIDO_CARGADO = false;
+let VOTACIONES_CARGADAS = false;
 document.querySelectorAll(".admin-tab").forEach((tabEl) => {
   tabEl.addEventListener("click", () => {
     document.querySelectorAll(".admin-tab").forEach((t) => t.classList.remove("active"));
     tabEl.classList.add("active");
     const target = tabEl.dataset.tab;
-    ["dashboard", "afiliados", "contenido", "usuarios"].forEach((name) => {
+    ["dashboard", "afiliados", "contenido", "votaciones", "usuarios"].forEach((name) => {
       $(`tab-${name}`).hidden = name !== target;
     });
     if (target === "usuarios") cargarAdmins();
     if (target === "contenido" && !CONTENIDO_CARGADO) {
       CONTENIDO_CARGADO = true;
       cargarContenido();
+    }
+    if (target === "votaciones" && !VOTACIONES_CARGADAS) {
+      VOTACIONES_CARGADAS = true;
+      cargarVotaciones();
     }
   });
 });
@@ -279,6 +284,7 @@ $("afiliadosTbody").addEventListener("click", async (e) => {
   } else if (btn.dataset.action === "eliminar") {
     if (!confirm(`¿Eliminar a ${afiliado?.nombre_completo || cedula} de la base de afiliados? Esta acción no se puede deshacer.`)) return;
     await deleteDoc(doc(db, "afiliados", cedula));
+    await sincronizarVotanteHash(afiliado, null);
     TODOS_AFILIADOS = TODOS_AFILIADOS.filter((a) => a.cedula !== cedula);
     aplicarFiltros();
     renderStats();
@@ -292,8 +298,36 @@ $("afiliadosTbody").addEventListener("click", async (e) => {
 const CAMPOS_FORM = [
   "cedula", "tipo_documento", "nombres", "apellidos", "email", "celular",
   "telefono_fijo", "ciudad", "departamento", "direccion", "empresa", "cargo",
-  "sede", "fecha_afiliacion", "canal_registro", "estado",
+  "sede", "fecha_afiliacion", "fecha_nacimiento", "canal_registro", "estado",
 ];
+
+// ---------------------------------------------------------------------------
+// Elegibilidad para votar: votantes_hash/{sha256(cedula|fecha_nacimiento)}
+// Se mantiene sincronizada automáticamente cada vez que se guarda o elimina
+// un afiliado desde este panel (ver también firebase/scripts/sync_votantes.mjs
+// para la sincronización masiva inicial).
+// ---------------------------------------------------------------------------
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function sincronizarVotanteHash(afiliadoAnterior, afiliadoNuevo) {
+  if (afiliadoAnterior && afiliadoAnterior.cedula && afiliadoAnterior.fecha_nacimiento) {
+    const hashViejo = await sha256Hex(`${afiliadoAnterior.cedula}|${afiliadoAnterior.fecha_nacimiento}`);
+    const yaNoAplica = !afiliadoNuevo ||
+      afiliadoNuevo.cedula !== afiliadoAnterior.cedula ||
+      afiliadoNuevo.fecha_nacimiento !== afiliadoAnterior.fecha_nacimiento ||
+      afiliadoNuevo.estado !== "activo";
+    if (yaNoAplica) {
+      await deleteDoc(doc(db, "votantes_hash", hashViejo)).catch(() => {});
+    }
+  }
+  if (afiliadoNuevo && afiliadoNuevo.estado === "activo" && afiliadoNuevo.cedula && afiliadoNuevo.fecha_nacimiento) {
+    const hashNuevo = await sha256Hex(`${afiliadoNuevo.cedula}|${afiliadoNuevo.fecha_nacimiento}`);
+    await setDoc(doc(db, "votantes_hash", hashNuevo), { sincronizado_en: new Date().toISOString() });
+  }
+}
 
 function abrirModalAfiliado(afiliado) {
   $("afiliadoFormError").hidden = true;
@@ -357,17 +391,21 @@ $("afiliadoForm").addEventListener("submit", async (e) => {
     cargo: $("f_cargo").value.trim() || null,
     sede: $("f_sede").value.trim() || null,
     fecha_afiliacion: $("f_fecha_afiliacion").value || null,
+    fecha_nacimiento: $("f_fecha_nacimiento").value || null,
     canal_registro: $("f_canal_registro").value,
     estado: $("f_estado").value,
     es_prueba: $("f_es_prueba").checked,
     actualizado_en: new Date().toISOString(),
   };
 
+  const afiliadoAnterior = cedulaOriginal ? TODOS_AFILIADOS.find((a) => a.cedula === cedulaOriginal) : null;
+
   const btn = $("afiliadoModalSave");
   btn.disabled = true;
   btn.textContent = "Guardando…";
   try {
     await setDoc(doc(db, "afiliados", cedula), data, { merge: true });
+    await sincronizarVotanteHash(afiliadoAnterior, data);
     if (cedulaOriginal && cedulaOriginal !== cedula) {
       // cambió la cédula (id del doc): borrar el doc viejo
       await deleteDoc(doc(db, "afiliados", cedulaOriginal));
@@ -780,3 +818,265 @@ $("juntaGuardarBtn").addEventListener("click", () => guardarBorrador("junta"));
 $("juntaPublicarBtn").addEventListener("click", () => publicarPagina("junta"));
 $("galeriaGuardarBtn").addEventListener("click", () => guardarBorrador("galeria"));
 $("galeriaPublicarBtn").addEventListener("click", () => publicarPagina("galeria"));
+
+// =============================================================================
+// Votaciones (asamblea y elecciones)
+// =============================================================================
+let VOTACIONES = [];
+let MODAL_PREGUNTAS = [];
+let TOTAL_ELEGIBLES = null;
+
+async function cargarVotaciones() {
+  const snap = await getDocs(collection(db, "votaciones"));
+  VOTACIONES = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  VOTACIONES.sort((a, b) => (b.creado_en || "").localeCompare(a.creado_en || ""));
+  renderVotacionesTabla();
+}
+
+function renderVotacionesTabla() {
+  $("votacionesTbody").innerHTML = VOTACIONES.map((v) => `
+    <tr>
+      <td>${escapeHtml(v.titulo)}</td>
+      <td>${v.tipo === "eleccion" ? "Elección" : "Asamblea"}</td>
+      <td><span class="badge ${v.estado === "abierta" ? "badge-abierta" : v.estado === "cerrada" ? "badge-cerrada" : "badge-borrador"}">${v.estado === "abierta" ? "Abierta" : v.estado === "cerrada" ? "Cerrada" : "Borrador"}</span></td>
+      <td>${v.participantes || 0} voto(s)</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" data-action="editar" data-id="${v.id}">Editar</button>
+          ${v.estado === "borrador" ? `<button class="icon-btn" data-action="abrir" data-id="${v.id}">Abrir</button>` : ""}
+          ${v.estado === "abierta" ? `<button class="icon-btn" data-action="cerrar" data-id="${v.id}">Cerrar</button>` : ""}
+          ${v.estado !== "borrador" ? `<button class="icon-btn" data-action="resultados" data-id="${v.id}">Resultados</button>` : ""}
+          <button class="icon-btn" data-action="eliminar" data-id="${v.id}">Eliminar</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="5" class="loading-row">No hay votaciones todavía.</td></tr>`;
+}
+
+$("votacionesTbody").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const votacion = VOTACIONES.find((v) => v.id === id);
+  const accion = btn.dataset.action;
+  if (accion === "editar") {
+    abrirModalVotacion(votacion);
+  } else if (accion === "abrir") {
+    if (!votacion.preguntas || !votacion.preguntas.length) {
+      return mostrarToast("Agrega al menos una pregunta antes de abrir la votación.");
+    }
+    await setDoc(doc(db, "votaciones", id), { estado: "abierta", abierta_en: new Date().toISOString() }, { merge: true });
+    mostrarToast("Votación abierta. Ya se puede votar desde el sitio público.");
+    await cargarVotaciones();
+  } else if (accion === "cerrar") {
+    if (!confirm(`¿Cerrar la votación "${votacion.titulo}"? Nadie podrá votar después de esto.`)) return;
+    await setDoc(doc(db, "votaciones", id), { estado: "cerrada", cerrada_en: new Date().toISOString() }, { merge: true });
+    mostrarToast("Votación cerrada.");
+    await cargarVotaciones();
+  } else if (accion === "resultados") {
+    await mostrarResultados(votacion);
+  } else if (accion === "eliminar") {
+    if (!confirm(`¿Eliminar la votación "${votacion.titulo}"? Esta acción no se puede deshacer.`)) return;
+    await deleteDoc(doc(db, "votaciones", id));
+    mostrarToast("Votación eliminada.");
+    await cargarVotaciones();
+  }
+});
+
+// ---- Modal crear/editar ----
+function nuevoId() {
+  return Math.random().toString(36).slice(2, 10);
+}
+
+function abrirModalVotacion(votacion) {
+  $("votacionFormError").hidden = true;
+  $("votacionForm").reset();
+  if (votacion) {
+    $("votacionModalTitle").textContent = "Editar votación";
+    $("v_id").value = votacion.id;
+    $("v_titulo").value = votacion.titulo || "";
+    $("v_descripcion").value = votacion.descripcion || "";
+    $("v_tipo").value = votacion.tipo || "asamblea";
+    $("v_resultados_publicos").checked = !!votacion.resultados_publicos;
+    MODAL_PREGUNTAS = JSON.parse(JSON.stringify(votacion.preguntas || []));
+  } else {
+    $("votacionModalTitle").textContent = "Nueva votación";
+    $("v_id").value = "";
+    $("v_tipo").value = "asamblea";
+    $("v_resultados_publicos").checked = true;
+    MODAL_PREGUNTAS = [{ id: nuevoId(), texto: "", opciones: [
+      { id: nuevoId(), texto: "A favor" },
+      { id: nuevoId(), texto: "En contra" },
+      { id: nuevoId(), texto: "Abstención" },
+    ] }];
+  }
+  actualizarEtiquetaTipo();
+  renderPreguntasEditor();
+  $("votacionModal").hidden = false;
+}
+
+function actualizarEtiquetaTipo() {
+  const esEleccion = $("v_tipo").value === "eleccion";
+  $("v_preguntas_label").textContent = esEleccion ? "Cargos" : "Preguntas";
+  $("votacionAgregarPreguntaBtn").textContent = esEleccion ? "+ Agregar cargo" : "+ Agregar pregunta";
+}
+$("v_tipo").addEventListener("change", () => { actualizarEtiquetaTipo(); renderPreguntasEditor(); });
+
+function renderPreguntasEditor() {
+  const esEleccion = $("v_tipo").value === "eleccion";
+  const lblPregunta = esEleccion ? "Nombre del cargo (ej. Presidencia)" : "Texto de la pregunta";
+  const lblOpcion = esEleccion ? "Nombre del candidato" : "Opción";
+
+  $("votacionPreguntasEditor").innerHTML = MODAL_PREGUNTAS.map((p, pi) => `
+    <div class="pregunta-card" data-pi="${pi}">
+      <div class="pregunta-top">
+        <input type="text" data-role="pregunta-texto" placeholder="${lblPregunta}" value="${escapeHtml(p.texto)}">
+        <button type="button" class="icon-btn" data-action="del-pregunta">Eliminar ${esEleccion ? "cargo" : "pregunta"}</button>
+      </div>
+      ${p.opciones.map((o, oi) => `
+        <div class="opcion-row" data-oi="${oi}">
+          <input type="text" data-role="opcion-texto" placeholder="${lblOpcion}" value="${escapeHtml(o.texto)}">
+          <button type="button" class="icon-btn" data-action="del-opcion">✕</button>
+        </div>
+      `).join("")}
+      <button type="button" class="btn-secondary" data-action="add-opcion" style="margin-top:4px; padding:6px 12px; font-size:0.78rem;">+ ${esEleccion ? "Agregar candidato" : "Agregar opción"}</button>
+    </div>
+  `).join("");
+}
+
+$("votacionPreguntasEditor").addEventListener("input", (e) => {
+  const card = e.target.closest(".pregunta-card");
+  if (!card) return;
+  const pi = parseInt(card.dataset.pi, 10);
+  if (e.target.dataset.role === "pregunta-texto") {
+    MODAL_PREGUNTAS[pi].texto = e.target.value;
+  } else if (e.target.dataset.role === "opcion-texto") {
+    const oi = parseInt(e.target.closest(".opcion-row").dataset.oi, 10);
+    MODAL_PREGUNTAS[pi].opciones[oi].texto = e.target.value;
+  }
+});
+
+$("votacionPreguntasEditor").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const card = e.target.closest(".pregunta-card");
+  const pi = parseInt(card.dataset.pi, 10);
+  if (btn.dataset.action === "del-pregunta") {
+    MODAL_PREGUNTAS.splice(pi, 1);
+  } else if (btn.dataset.action === "add-opcion") {
+    MODAL_PREGUNTAS[pi].opciones.push({ id: nuevoId(), texto: "" });
+  } else if (btn.dataset.action === "del-opcion") {
+    const oi = parseInt(e.target.closest(".opcion-row").dataset.oi, 10);
+    MODAL_PREGUNTAS[pi].opciones.splice(oi, 1);
+  }
+  renderPreguntasEditor();
+});
+
+$("votacionAgregarPreguntaBtn").addEventListener("click", () => {
+  MODAL_PREGUNTAS.push({ id: nuevoId(), texto: "", opciones: [{ id: nuevoId(), texto: "" }, { id: nuevoId(), texto: "" }] });
+  renderPreguntasEditor();
+});
+
+$("openNewVotacionBtn").addEventListener("click", () => abrirModalVotacion(null));
+$("votacionModalCancel").addEventListener("click", () => { $("votacionModal").hidden = true; });
+
+$("votacionForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("votacionFormError");
+  err.hidden = true;
+
+  const titulo = $("v_titulo").value.trim();
+  if (!titulo) {
+    err.textContent = "El título es obligatorio.";
+    err.hidden = false;
+    return;
+  }
+  const preguntasLimpias = MODAL_PREGUNTAS
+    .map((p) => ({ ...p, texto: p.texto.trim(), opciones: p.opciones.map((o) => ({ ...o, texto: o.texto.trim() })).filter((o) => o.texto) }))
+    .filter((p) => p.texto && p.opciones.length >= 2);
+
+  if (!preguntasLimpias.length) {
+    err.textContent = "Agrega al menos una pregunta/cargo con mínimo 2 opciones/candidatos, todos con texto.";
+    err.hidden = false;
+    return;
+  }
+
+  const idExistente = $("v_id").value;
+  const data = {
+    titulo,
+    descripcion: $("v_descripcion").value.trim(),
+    tipo: $("v_tipo").value,
+    resultados_publicos: $("v_resultados_publicos").checked,
+    preguntas: preguntasLimpias,
+    actualizado_en: new Date().toISOString(),
+  };
+
+  const btn = $("votacionModalSave");
+  btn.disabled = true;
+  btn.textContent = "Guardando…";
+  try {
+    if (idExistente) {
+      await setDoc(doc(db, "votaciones", idExistente), data, { merge: true });
+    } else {
+      const ref = doc(collection(db, "votaciones"));
+      await setDoc(ref, { ...data, estado: "borrador", participantes: 0, creado_en: new Date().toISOString() });
+    }
+    $("votacionModal").hidden = true;
+    mostrarToast("Votación guardada.");
+    await cargarVotaciones();
+  } catch (e2) {
+    err.textContent = "No se pudo guardar. Intenta de nuevo.";
+    err.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Guardar borrador";
+  }
+});
+
+// ---- Resultados ----
+async function mostrarResultados(votacion) {
+  $("resultadosModalTitle").textContent = `Resultados — ${votacion.titulo}`;
+  $("resultadosContenido").innerHTML = `<p style="color:var(--texto-mute); font-size:0.85rem;">Cargando…</p>`;
+  $("resultadosModal").hidden = false;
+
+  if (TOTAL_ELEGIBLES === null) {
+    const snapElegibles = await getDocs(collection(db, "votantes_hash"));
+    TOTAL_ELEGIBLES = snapElegibles.size;
+  }
+
+  const q = query(collection(db, "voto_respuestas"), where("votacion_id", "==", votacion.id));
+  const snap = await getDocs(q);
+  const respuestas = snap.docs.map((d) => d.data());
+
+  const participacionPct = TOTAL_ELEGIBLES ? Math.round((respuestas.length / TOTAL_ELEGIBLES) * 100) : 0;
+
+  let html = `<p class="mono-note" style="margin-bottom:18px;">Participación: ${respuestas.length} de ${TOTAL_ELEGIBLES} afiliados habilitados (${participacionPct}%)</p>`;
+
+  for (const pregunta of votacion.preguntas) {
+    const conteos = {};
+    pregunta.opciones.forEach((o) => { conteos[o.id] = 0; });
+    let totalPregunta = 0;
+    respuestas.forEach((r) => {
+      const elegida = (r.respuestas || []).find((x) => x.pregunta_id === pregunta.id);
+      if (elegida && conteos[elegida.opcion_id] !== undefined) {
+        conteos[elegida.opcion_id]++;
+        totalPregunta++;
+      }
+    });
+    html += `<div class="resultado-pregunta"><h4>${escapeHtml(pregunta.texto)}</h4>`;
+    pregunta.opciones.forEach((o) => {
+      const n = conteos[o.id];
+      const pct = totalPregunta ? Math.round((n / totalPregunta) * 100) : 0;
+      html += `
+        <div class="resultado-opcion">
+          <div class="fila"><span>${escapeHtml(o.texto)}</span><span>${n} (${pct}%)</span></div>
+          <div class="barra-bg"><div class="barra-fill" style="width:${pct}%;"></div></div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+  $("resultadosContenido").innerHTML = html;
+}
+
+$("resultadosModalCerrar").addEventListener("click", () => { $("resultadosModal").hidden = true; });

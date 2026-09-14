@@ -468,6 +468,44 @@ table.admin-table tbody tr:hover{background:var(--papel-2);}
 .badge-borrador{background:var(--papel-2); color:var(--texto-mute);}
 .badge-publicado{background:var(--sky-100); color:var(--blue-800);}
 
+/* ---- Votaciones ---- */
+.badge-abierta{background:var(--sky-100); color:var(--blue-800);}
+.badge-cerrada{background:var(--papel-2); color:var(--texto-mute);}
+.pregunta-card{
+  background:var(--papel-2);
+  border:1px solid var(--linea);
+  border-radius:12px;
+  padding:14px;
+}
+.pregunta-card .pregunta-top{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-bottom:10px;
+}
+.pregunta-card .pregunta-top input{
+  flex:1;
+  padding:8px 10px;
+  border:1px solid var(--linea);
+  border-radius:6px;
+  font-size:0.88rem;
+  font-weight:600;
+}
+.opcion-row{display:flex; gap:8px; align-items:center; margin-bottom:6px;}
+.opcion-row input{
+  flex:1;
+  padding:7px 9px;
+  border:1px solid var(--linea);
+  border-radius:6px;
+  font-size:0.83rem;
+}
+.resultado-pregunta{margin-bottom:20px;}
+.resultado-pregunta h4{font-size:0.95rem; margin-bottom:10px; color:var(--navy-900);}
+.resultado-opcion{margin-bottom:8px;}
+.resultado-opcion .fila{display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;}
+.resultado-opcion .barra-bg{height:8px; border-radius:4px; background:var(--papel-2); overflow:hidden;}
+.resultado-opcion .barra-fill{height:100%; background:var(--blue-700); border-radius:4px;}
+
 @media (max-width:640px){
   .modal-grid{grid-template-columns:1fr;}
   .admin-main{padding:16px;}

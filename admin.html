@@ -53,6 +53,7 @@
     <div class="admin-tab active" data-tab="dashboard">Resumen</div>
     <div class="admin-tab" data-tab="afiliados">Afiliados</div>
     <div class="admin-tab" data-tab="contenido">Contenido del sitio</div>
+    <div class="admin-tab" data-tab="votaciones">Votaciones</div>
     <div class="admin-tab" data-tab="usuarios">Usuarios del panel</div>
   </nav>
 
@@ -192,6 +193,23 @@
       </div>
     </section>
 
+    <!-- ---- TAB: votaciones ---- -->
+    <section id="tab-votaciones" hidden>
+      <div class="filters-bar">
+        <p style="flex:1; color:var(--texto-mute); font-size:0.85rem; margin:0;">
+          El voto es <strong>secreto</strong>: se registra que la persona votó (para evitar doble voto),
+          pero no queda ningún vínculo entre su identidad y la opción que eligió.
+        </p>
+        <button class="btn-primary" id="openNewVotacionBtn" style="width:auto; white-space:nowrap;">+ Nueva votación</button>
+      </div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Título</th><th>Tipo</th><th>Estado</th><th>Participación</th><th></th></tr></thead>
+          <tbody id="votacionesTbody"><tr><td colspan="5" class="loading-row">Cargando votaciones…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
     <!-- ---- TAB: usuarios ---- -->
     <section id="tab-usuarios" hidden>
       <p style="max-width:640px; color:var(--texto-mute); font-size:0.88rem; margin-bottom:16px;">
@@ -245,6 +263,7 @@
         <div class="admin-field"><label>Cargo</label><input type="text" id="f_cargo"></div>
         <div class="admin-field"><label>Sede</label><input type="text" id="f_sede"></div>
         <div class="admin-field"><label>Fecha de afiliación</label><input type="date" id="f_fecha_afiliacion"></div>
+        <div class="admin-field"><label>Fecha de nacimiento <span style="font-weight:400; opacity:.7;">(necesaria para votar)</span></label><input type="date" id="f_fecha_nacimiento"></div>
         <div class="admin-field"><label>Canal de registro</label>
           <select id="f_canal_registro">
             <option value="presencial">Presencial</option>
@@ -307,6 +326,55 @@
         <button type="submit" class="btn-primary" id="noticiaModalSave" style="width:auto; padding:10px 22px;">Guardar</button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL votación (crear/editar) ===================== -->
+<div id="votacionModal" class="modal-backdrop" hidden>
+  <div class="modal-card" style="max-width:760px;">
+    <h2 id="votacionModalTitle">Nueva votación</h2>
+    <form id="votacionForm">
+      <input type="hidden" id="v_id">
+      <div class="modal-grid">
+        <div class="admin-field full"><label>Título *</label><input type="text" id="v_titulo" required></div>
+        <div class="admin-field full"><label>Descripción (opcional)</label><textarea id="v_descripcion" rows="2" style="width:100%; padding:10px 12px; border:1px solid var(--linea); border-radius:8px; font-family:'Inter',sans-serif; font-size:0.9rem;"></textarea></div>
+        <div class="admin-field"><label>Tipo</label>
+          <select id="v_tipo">
+            <option value="asamblea">Asamblea (moción / decisión)</option>
+            <option value="eleccion">Elección de cargos</option>
+          </select>
+        </div>
+        <div class="admin-field">
+          <label class="checkbox-inline" style="margin-top:28px;">
+            <input type="checkbox" id="v_resultados_publicos">
+            Mostrar resultados públicamente al cerrar
+          </label>
+        </div>
+      </div>
+
+      <div style="margin-top:18px; display:flex; justify-content:space-between; align-items:center;">
+        <span id="v_preguntas_label" style="font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--texto-mute); text-transform:uppercase;">Preguntas</span>
+        <button type="button" class="btn-secondary" id="votacionAgregarPreguntaBtn">+ Agregar pregunta</button>
+      </div>
+      <div id="votacionPreguntasEditor" style="margin-top:10px; display:flex; flex-direction:column; gap:14px;"></div>
+
+      <div id="votacionFormError" class="admin-error" hidden style="margin-top:16px;"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="votacionModalCancel">Cancelar</button>
+        <button type="submit" class="btn-primary" id="votacionModalSave" style="width:auto; padding:10px 22px;">Guardar borrador</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL resultados de votación ===================== -->
+<div id="resultadosModal" class="modal-backdrop" hidden>
+  <div class="modal-card" style="max-width:700px;">
+    <h2 id="resultadosModalTitle">Resultados</h2>
+    <div id="resultadosContenido"></div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" id="resultadosModalCerrar">Cerrar</button>
+    </div>
   </div>
 </div>
 

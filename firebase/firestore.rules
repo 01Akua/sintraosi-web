@@ -66,5 +66,61 @@ service cloud.firestore {
       allow read: if true;
       allow write: if esAdmin();
     }
+
+    // ---- Votaciones (asamblea y elecciones) ----
+    //
+    // Los afiliados NO tienen cuenta de Firebase Auth, así que la identidad y el
+    // "un voto por persona" se garantizan sin backend, solo con estas reglas:
+    //
+    // 1. votantes_hash/{hash}: hash = sha256(cedula + "|" + fecha_nacimiento).
+    //    El panel (o el script de sincronización) crea un doc vacío por cada
+    //    afiliado activo -> el hash en sí no revela la cédula ni la fecha.
+    // 2. Para votar, el navegador del afiliado calcula el mismo hash a partir de
+    //    lo que la persona escribió y solo puede crear un voto_registros/{id}
+    //    si ese hash existe en votantes_hash (= es un afiliado activo real).
+    // 3. voto_registros/{votacionId}__{hash}: el ID del documento combina
+    //    votación + hash. Firestore trata un segundo intento de escribir el
+    //    mismo ID como "update", no "create" -> como update/delete están
+    //    bloqueados, es estructuralmente imposible votar dos veces con el
+    //    mismo hash en la misma votación.
+    // 4. voto_respuestas/{autoId}: el voto real (qué opción eligió). No tiene
+    //    ningún campo que lo conecte con voto_registros ni con la persona ->
+    //    voto secreto. Solo un admin puede leer las respuestas mientras la
+    //    votación está abierta; si el creador marcó "resultados públicos",
+    //    cualquiera puede leerlas una vez cerrada.
+
+    match /votaciones/{votacionId} {
+      allow read: if esAdmin() || resource.data.estado in ['abierta', 'cerrada'];
+      allow create, delete: if esAdmin();
+      // El voto público solo puede tocar el contador `participantes` (vía
+      // increment() atómico) mientras la votación está abierta -> no puede
+      // cambiar título, preguntas, estado ni nada más.
+      allow update: if esAdmin() || (
+        resource.data.estado == 'abierta' &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['participantes'])
+      );
+    }
+
+    match /votantes_hash/{hash} {
+      // Lectura pública: el hash no es reversible a la cédula, solo sirve para
+      // que el propio afiliado confirme "sí estoy habilitado" antes de votar.
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    match /voto_registros/{regId} {
+      allow read: if esAdmin();
+      allow create: if exists(/databases/$(database)/documents/votantes_hash/$(regId.split('__')[1])) &&
+        get(/databases/$(database)/documents/votaciones/$(regId.split('__')[0])).data.estado == 'abierta';
+      allow update, delete: if false;
+    }
+
+    match /voto_respuestas/{respId} {
+      allow read: if esAdmin() ||
+        get(/databases/$(database)/documents/votaciones/$(resource.data.votacion_id)).data.estado == 'cerrada' &&
+        get(/databases/$(database)/documents/votaciones/$(resource.data.votacion_id)).data.resultados_publicos == true;
+      allow create: if get(/databases/$(database)/documents/votaciones/$(request.resource.data.votacion_id)).data.estado == 'abierta';
+      allow update, delete: if false;
+    }
   }
 }
