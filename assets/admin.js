@@ -115,38 +115,78 @@ async function cargarTodo() {
   aplicarFiltros();
 }
 
+// Colores del donut (coherentes con las paletas de badges ya usadas en la tabla)
+const COLOR_WEB = "#2C7A46";        // var(--blue-700)
+const COLOR_PRESENCIAL = "#C9A227"; // var(--amber)
+const COLOR_ACTIVO = "#2C7A46";     // var(--blue-700)
+const COLOR_PENDIENTE = "#C62828";  // var(--rojo)
+
+function afiliadosParaStats() {
+  const incluirPrueba = $("filterMostrarPrueba").checked;
+  return incluirPrueba ? TODOS_AFILIADOS : TODOS_AFILIADOS.filter((a) => !a.es_prueba);
+}
+
+function construirDonut({ pctA, colorA, lblA, valA, pctB, colorB, lblB, valB, centroLbl }) {
+  const gradiente = `conic-gradient(${colorA} 0% ${pctA}%, ${colorB} ${pctA}% 100%)`;
+  return `
+    <div class="donut-card">
+      <div class="donut" style="background:${gradiente};">
+        <div class="donut-center">
+          <div class="pct">${pctA}%</div>
+          <div class="pct-lbl">${centroLbl}</div>
+        </div>
+      </div>
+      <div class="donut-legend">
+        <div class="item"><span class="dot" style="background:${colorA};"></span><span class="lbl">${lblA}</span> <span class="val">${valA} (${pctA}%)</span></div>
+        <div class="item"><span class="dot" style="background:${colorB};"></span><span class="lbl">${lblB}</span> <span class="val">${valB} (${100 - pctA}%)</span></div>
+      </div>
+    </div>
+  `;
+}
+
 function renderStats() {
-  const total = TODOS_AFILIADOS.length;
-  const web = TODOS_AFILIADOS.filter((a) => a.canal_registro === "web").length;
+  const incluyendoPrueba = $("filterMostrarPrueba").checked;
+  const base = afiliadosParaStats();
+  const total = base.length;
+  const web = base.filter((a) => a.canal_registro === "web").length;
   const presencial = total - web;
-  const activos = TODOS_AFILIADOS.filter((a) => a.estado === "activo").length;
+  const activos = base.filter((a) => a.estado === "activo").length;
   const pendientes = total - activos;
   const pctWeb = total ? Math.round((web / total) * 100) : 0;
-  const pctPresencial = 100 - pctWeb;
+  const pctActivos = total ? Math.round((activos / total) * 100) : 0;
+  const nPrueba = TODOS_AFILIADOS.filter((a) => a.es_prueba).length;
 
   $("statsGrid").innerHTML = `
-    <div class="stat-card">
-      <div class="n">${total.toLocaleString("es-CO")}</div>
-      <div class="lbl">Total de afiliados</div>
-    </div>
-    <div class="stat-card">
-      <div class="n">${activos.toLocaleString("es-CO")}</div>
-      <div class="lbl">Activos (oficializados)</div>
-    </div>
-    <div class="stat-card">
-      <div class="n">${pendientes.toLocaleString("es-CO")}</div>
-      <div class="lbl">Pendientes de verificación</div>
-    </div>
-    <div class="stat-card" style="grid-column:span 2;">
-      <div class="lbl" style="margin-bottom:8px;">Canal de afiliación</div>
-      <div style="display:flex; justify-content:space-between; font-size:0.82rem; margin-bottom:6px;">
-        <span>Página web — ${web} (${pctWeb}%)</span>
-        <span>Presencial — ${presencial} (${pctPresencial}%)</span>
+    ${nPrueba ? `<div class="admin-error" style="background:var(--sky-100); color:var(--blue-800); border-color:var(--blue-600); margin-bottom:14px;">
+      ${incluyendoPrueba
+        ? `Mostrando estadísticas <strong>incluyendo ${nPrueba} registros de prueba</strong> — desmarca "Mostrar registros de prueba" para ver solo datos reales.`
+        : `Hay ${nPrueba} registros de prueba guardados, excluidos de estas estadísticas. Marca "Mostrar registros de prueba" (pestaña Afiliados) para incluirlos aquí y comparar.`}
+    </div>` : ""}
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="n">${total.toLocaleString("es-CO")}</div>
+        <div class="lbl">Total de afiliados</div>
       </div>
-      <div class="bar">
-        <div class="seg-web" style="width:${pctWeb}%;"></div>
-        <div class="seg-presencial" style="width:${pctPresencial}%;"></div>
+      <div class="stat-card">
+        <div class="n">${activos.toLocaleString("es-CO")}</div>
+        <div class="lbl">Activos (oficializados)</div>
       </div>
+      <div class="stat-card">
+        <div class="n">${pendientes.toLocaleString("es-CO")}</div>
+        <div class="lbl">Pendientes de verificación</div>
+      </div>
+    </div>
+    <div class="donut-row">
+      ${construirDonut({
+        pctA: pctWeb, colorA: COLOR_WEB, lblA: "Página web", valA: web,
+        colorB: COLOR_PRESENCIAL, lblB: "Presencial", valB: presencial,
+        centroLbl: "por web",
+      })}
+      ${construirDonut({
+        pctA: pctActivos, colorA: COLOR_ACTIVO, lblA: "Activos", valA: activos,
+        colorB: COLOR_PENDIENTE, lblB: "Pendientes", valB: pendientes,
+        centroLbl: "activos",
+      })}
     </div>
   `;
 }
@@ -162,8 +202,10 @@ function aplicarFiltros() {
   const q = normalizar($("searchInput").value.trim());
   const canal = $("filterCanal").value;
   const estado = $("filterEstado").value;
+  const mostrarPrueba = $("filterMostrarPrueba").checked;
 
   VISTA_FILTRADA = TODOS_AFILIADOS.filter((a) => {
+    if (!mostrarPrueba && a.es_prueba) return false;
     if (canal && a.canal_registro !== canal) return false;
     if (estado && a.estado !== estado) return false;
     if (!q) return true;
@@ -178,10 +220,11 @@ function aplicarFiltros() {
   renderTabla();
 }
 
-["searchInput", "filterCanal", "filterEstado"].forEach((id) => {
+["searchInput", "filterCanal", "filterEstado", "filterMostrarPrueba"].forEach((id) => {
   $(id).addEventListener("input", aplicarFiltros);
   $(id).addEventListener("change", aplicarFiltros);
 });
+$("filterMostrarPrueba").addEventListener("change", renderStats);
 
 function renderTabla() {
   const total = VISTA_FILTRADA.length;
@@ -194,7 +237,7 @@ function renderTabla() {
     $("afiliadosTbody").innerHTML = pagina.map((a) => `
       <tr>
         <td>${escapeHtml(a.cedula)}</td>
-        <td>${escapeHtml(a.nombre_completo || "—")}</td>
+        <td>${escapeHtml(a.nombre_completo || "—")}${a.es_prueba ? '<span class="badge badge-prueba">PRUEBA</span>' : ""}</td>
         <td>${escapeHtml(a.empresa || "—")}</td>
         <td>${escapeHtml(a.ciudad || "—")}</td>
         <td><span class="badge ${a.canal_registro === "web" ? "badge-web" : "badge-presencial"}">${a.canal_registro === "web" ? "Página web" : "Presencial"}</span></td>
@@ -259,12 +302,14 @@ function abrirModalAfiliado(afiliado) {
       const el = $("f_" + c);
       if (el) el.value = afiliado[c] || "";
     });
+    $("f_es_prueba").checked = !!afiliado.es_prueba;
   } else {
     $("afiliadoModalTitle").textContent = "Nuevo afiliado";
     $("f_cedula_original").value = "";
     $("f_cedula").disabled = false;
     $("f_canal_registro").value = "presencial";
     $("f_estado").value = "activo";
+    $("f_es_prueba").checked = false;
   }
   $("afiliadoModal").hidden = false;
 }
@@ -309,6 +354,7 @@ $("afiliadoForm").addEventListener("submit", async (e) => {
     fecha_afiliacion: $("f_fecha_afiliacion").value || null,
     canal_registro: $("f_canal_registro").value,
     estado: $("f_estado").value,
+    es_prueba: $("f_es_prueba").checked,
     actualizado_en: new Date().toISOString(),
   };
 

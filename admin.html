@@ -59,7 +59,7 @@
 
     <!-- ---- TAB: dashboard ---- -->
     <section id="tab-dashboard">
-      <div class="stats-grid" id="statsGrid">
+      <div id="statsGrid">
         <div class="loading-row">Cargando estadísticas…</div>
       </div>
     </section>
@@ -78,6 +78,10 @@
           <option value="activo">Activo</option>
           <option value="pendiente_verificacion">Pendiente de verificación</option>
         </select>
+        <label class="checkbox-inline">
+          <input type="checkbox" id="filterMostrarPrueba">
+          Mostrar registros de prueba
+        </label>
         <button class="btn-primary" id="openNewAfiliadoBtn" style="width:auto; white-space:nowrap;">+ Nuevo afiliado</button>
       </div>
 
@@ -173,6 +177,12 @@
             <option value="activo">Activo</option>
             <option value="pendiente_verificacion">Pendiente de verificación</option>
           </select>
+        </div>
+        <div class="admin-field full">
+          <label class="checkbox-inline">
+            <input type="checkbox" id="f_es_prueba">
+            Marcar como registro de prueba (no cuenta en las estadísticas ni aparece en la tabla por defecto)
+          </label>
         </div>
       </div>
       <div id="afiliadoFormError" class="admin-error" hidden style="margin-top:16px;"></div>
