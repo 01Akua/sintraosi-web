@@ -1,0 +1,10 @@
+.DS_Store
+
+# Datos personales de afiliados (PII) — NUNCA subir a este repo público.
+# La base de datos real vive en Firestore, protegida por reglas de acceso.
+afiliados.csv
+wppf_db7_forms.csv
+BASE DE DATOS*.xls
+firebase/data/
+firebase/scripts/serviceAccountKey.json
+firebase/node_modules/

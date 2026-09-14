@@ -1,0 +1,47 @@
+rules_version = '2';
+
+// Reglas de acceso a la base de afiliados de SINTRAOSI.
+//
+// Modelo: solo usuarios autenticados con Firebase Auth (email/contraseña) pueden
+// leer o escribir. Las cuentas de Auth se crean manualmente en la consola de
+// Firebase (Authentication -> Add user), NO hay registro público. Además, cada
+// usuario autenticado debe tener un documento admins/{email en minúsculas} para
+// poder operar -> así una cuenta de Auth sin admin asociado no tiene acceso.
+// Se usa el email (no el UID) como ID del documento admin para que un admin
+// existente pueda dar de alta a otro desde el propio panel sin necesitar el UID.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function esAdmin() {
+      return request.auth != null &&
+        request.auth.token.email != null &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email.lower()));
+    }
+
+    match /afiliados/{cedula} {
+      allow read: if esAdmin();
+      allow create: if esAdmin() &&
+        request.resource.data.cedula == cedula &&
+        request.resource.data.canal_registro in ['presencial', 'web'] &&
+        request.resource.data.estado in ['activo', 'pendiente_verificacion'];
+      allow update: if esAdmin();
+      allow delete: if esAdmin();
+    }
+
+    // admins/{email en minúsculas}: { email, nombre, rol, creado_en, creado_por }
+    // Solo un admin existente puede leer la lista / dar de alta a otros. Un admin
+    // no se puede borrar a sí mismo (evita quedarse sin acceso por accidente).
+    match /admins/{email} {
+      allow read: if esAdmin();
+      allow create, update: if esAdmin();
+      allow delete: if esAdmin() && email != request.auth.token.email.lower();
+    }
+
+    // Bitácora simple de cambios (opcional, se escribe desde el panel).
+    match /auditoria/{entryId} {
+      allow read: if esAdmin();
+      allow create: if esAdmin();
+      allow update, delete: if false;
+    }
+  }
+}

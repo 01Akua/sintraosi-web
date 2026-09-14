@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Administrativo — SINTRAOSI</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;0,9..144,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/admin.css">
+</head>
+<body class="admin-body">
+
+<!-- ===================== LOGIN ===================== -->
+<section id="loginScreen" class="admin-login">
+  <div class="admin-login-card">
+    <img src="assets/logo-sintraosi.png" alt="SINTRAOSI">
+    <h1>Panel de Afiliados</h1>
+    <p class="sub">Acceso exclusivo para junta directiva</p>
+    <div id="loginError" class="admin-error" hidden></div>
+    <form id="loginForm">
+      <div class="admin-field">
+        <label for="loginEmail">Correo</label>
+        <input type="email" id="loginEmail" required autocomplete="username">
+      </div>
+      <div class="admin-field">
+        <label for="loginPassword">Contraseña</label>
+        <input type="password" id="loginPassword" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn-primary" id="loginBtn">Iniciar sesión</button>
+    </form>
+  </div>
+</section>
+
+<!-- ===================== APP ===================== -->
+<div id="appShell" class="admin-shell" hidden>
+  <div class="admin-topbar">
+    <div class="admin-topbar-left">
+      <img src="assets/logo-sintraosi.png" alt="SINTRAOSI">
+      <div>
+        <h1>Panel de Afiliados</h1>
+        <span>SINTRAOSI — gestión interna</span>
+      </div>
+    </div>
+    <div class="admin-topbar-right">
+      <span id="userEmailLabel"></span>
+      <button class="btn-secondary" id="logoutBtn">Cerrar sesión</button>
+    </div>
+  </div>
+
+  <nav class="admin-tabs">
+    <div class="admin-tab active" data-tab="dashboard">Resumen</div>
+    <div class="admin-tab" data-tab="afiliados">Afiliados</div>
+    <div class="admin-tab" data-tab="usuarios">Usuarios del panel</div>
+  </nav>
+
+  <main class="admin-main">
+
+    <!-- ---- TAB: dashboard ---- -->
+    <section id="tab-dashboard">
+      <div class="stats-grid" id="statsGrid">
+        <div class="loading-row">Cargando estadísticas…</div>
+      </div>
+    </section>
+
+    <!-- ---- TAB: afiliados ---- -->
+    <section id="tab-afiliados" hidden>
+      <div class="filters-bar">
+        <input type="search" id="searchInput" placeholder="Buscar por nombre, cédula, empresa, ciudad, email…">
+        <select id="filterCanal">
+          <option value="">Todos los canales</option>
+          <option value="web">Página web</option>
+          <option value="presencial">Presencial</option>
+        </select>
+        <select id="filterEstado">
+          <option value="">Todos los estados</option>
+          <option value="activo">Activo</option>
+          <option value="pendiente_verificacion">Pendiente de verificación</option>
+        </select>
+        <button class="btn-primary" id="openNewAfiliadoBtn" style="width:auto; white-space:nowrap;">+ Nuevo afiliado</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Cédula</th>
+              <th>Nombre completo</th>
+              <th>Empresa</th>
+              <th>Ciudad</th>
+              <th>Canal</th>
+              <th>Estado</th>
+              <th>Fecha afiliación</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="afiliadosTbody">
+            <tr><td colspan="8" class="loading-row">Cargando afiliados…</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pager">
+        <span id="pagerInfo"></span>
+        <div class="pager-btns">
+          <button class="btn-secondary" id="pagerPrev">← Anterior</button>
+          <button class="btn-secondary" id="pagerNext">Siguiente →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---- TAB: usuarios ---- -->
+    <section id="tab-usuarios" hidden>
+      <p style="max-width:640px; color:var(--texto-mute); font-size:0.88rem; margin-bottom:16px;">
+        Para dar acceso a un nuevo miembro de junta directiva: primero crea su cuenta en
+        <strong>Firebase Console → Authentication → Add user</strong> (email + contraseña temporal),
+        y luego agrégalo aquí con el mismo correo para habilitarle el acceso al panel.
+      </p>
+      <div class="filters-bar">
+        <input type="email" id="newAdminEmail" placeholder="correo@ejemplo.com" style="flex:1; min-width:220px; padding:10px 14px; border:1px solid var(--linea); border-radius:8px;">
+        <input type="text" id="newAdminNombre" placeholder="Nombre completo" style="flex:1; min-width:180px; padding:10px 14px; border:1px solid var(--linea); border-radius:8px;">
+        <button class="btn-primary" id="addAdminBtn" style="width:auto; white-space:nowrap;">Dar acceso</button>
+      </div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Email</th><th>Nombre</th><th>Agregado</th><th></th></tr></thead>
+          <tbody id="adminsTbody">
+            <tr><td colspan="4" class="loading-row">Cargando usuarios…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ===================== MODAL afiliado ===================== -->
+<div id="afiliadoModal" class="modal-backdrop" hidden>
+  <div class="modal-card">
+    <h2 id="afiliadoModalTitle">Nuevo afiliado</h2>
+    <form id="afiliadoForm">
+      <input type="hidden" id="f_cedula_original">
+      <div class="modal-grid">
+        <div class="admin-field"><label>Cédula *</label><input type="text" id="f_cedula" required></div>
+        <div class="admin-field"><label>Tipo de documento</label>
+          <select id="f_tipo_documento">
+            <option value="CEDULA DE CIUDADANIA">Cédula de ciudadanía</option>
+            <option value="CEDULA DE EXTRANJERIA">Cédula de extranjería</option>
+            <option value="TARJETA DE IDENTIDAD">Tarjeta de identidad</option>
+            <option value="PASAPORTE">Pasaporte</option>
+          </select>
+        </div>
+        <div class="admin-field"><label>Nombres *</label><input type="text" id="f_nombres" required></div>
+        <div class="admin-field"><label>Apellidos *</label><input type="text" id="f_apellidos" required></div>
+        <div class="admin-field"><label>Email</label><input type="email" id="f_email"></div>
+        <div class="admin-field"><label>Celular</label><input type="text" id="f_celular"></div>
+        <div class="admin-field"><label>Teléfono fijo</label><input type="text" id="f_telefono_fijo"></div>
+        <div class="admin-field"><label>Ciudad</label><input type="text" id="f_ciudad"></div>
+        <div class="admin-field"><label>Departamento</label><input type="text" id="f_departamento"></div>
+        <div class="admin-field full"><label>Dirección</label><input type="text" id="f_direccion"></div>
+        <div class="admin-field"><label>Empresa</label><input type="text" id="f_empresa"></div>
+        <div class="admin-field"><label>Cargo</label><input type="text" id="f_cargo"></div>
+        <div class="admin-field"><label>Sede</label><input type="text" id="f_sede"></div>
+        <div class="admin-field"><label>Fecha de afiliación</label><input type="date" id="f_fecha_afiliacion"></div>
+        <div class="admin-field"><label>Canal de registro</label>
+          <select id="f_canal_registro">
+            <option value="presencial">Presencial</option>
+            <option value="web">Página web</option>
+          </select>
+        </div>
+        <div class="admin-field"><label>Estado</label>
+          <select id="f_estado">
+            <option value="activo">Activo</option>
+            <option value="pendiente_verificacion">Pendiente de verificación</option>
+          </select>
+        </div>
+      </div>
+      <div id="afiliadoFormError" class="admin-error" hidden style="margin-top:16px;"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="afiliadoModalCancel">Cancelar</button>
+        <button type="submit" class="btn-primary" id="afiliadoModalSave" style="width:auto; padding:10px 22px;">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="assets/firebase-config.js"></script>
+<script type="module" src="assets/admin.js"></script>
+</body>
+</html>

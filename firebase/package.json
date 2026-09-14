@@ -1,0 +1,11 @@
+{
+  "name": "sintraosi-firebase",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "import": "node scripts/import_afiliados.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}
