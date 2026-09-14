@@ -52,6 +52,7 @@
   <nav class="admin-tabs">
     <div class="admin-tab active" data-tab="dashboard">Resumen</div>
     <div class="admin-tab" data-tab="afiliados">Afiliados</div>
+    <div class="admin-tab" data-tab="contenido">Contenido del sitio</div>
     <div class="admin-tab" data-tab="usuarios">Usuarios del panel</div>
   </nav>
 
@@ -110,6 +111,84 @@
           <button class="btn-secondary" id="pagerPrev">← Anterior</button>
           <button class="btn-secondary" id="pagerNext">Siguiente →</button>
         </div>
+      </div>
+    </section>
+
+    <!-- ---- TAB: contenido del sitio ---- -->
+    <section id="tab-contenido" hidden>
+      <nav class="content-subtabs">
+        <div class="content-subtab active" data-subtab="noticias">Noticias</div>
+        <div class="content-subtab" data-subtab="inicio">Textos — Inicio</div>
+        <div class="content-subtab" data-subtab="regionales">Regionales</div>
+        <div class="content-subtab" data-subtab="junta">Junta Directiva</div>
+        <div class="content-subtab" data-subtab="galeria">Galería</div>
+      </nav>
+
+      <!-- Noticias -->
+      <div id="content-noticias" class="content-panel">
+        <div class="filters-bar">
+          <p style="flex:1; color:var(--texto-mute); font-size:0.85rem; margin:0;">
+            Los artículos <strong>publicados</strong> ya son visibles en el sitio. Los <strong>borrador</strong> solo los ves tú aquí.
+          </p>
+          <button class="btn-primary" id="openNewNoticiaBtn" style="width:auto; white-space:nowrap;">+ Nueva noticia</button>
+        </div>
+        <div class="table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Orden</th><th>Título</th><th>Región</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+            <tbody id="noticiasTbody"><tr><td colspan="6" class="loading-row">Cargando noticias…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Textos Inicio -->
+      <div id="content-inicio" class="content-panel" hidden>
+        <div class="publish-bar">
+          <span id="inicioEstadoLbl" class="mono-note"></span>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-secondary" id="inicioGuardarBtn">Guardar borrador</button>
+            <button class="btn-primary" id="inicioPublicarBtn" style="width:auto; padding:10px 20px;">Publicar cambios</button>
+          </div>
+        </div>
+        <div id="inicioForm" class="content-form"></div>
+      </div>
+
+      <!-- Regionales -->
+      <div id="content-regionales" class="content-panel" hidden>
+        <div class="publish-bar">
+          <span id="regionalesEstadoLbl" class="mono-note"></span>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-secondary" id="regionalesAgregarBtn">+ Agregar regional</button>
+            <button class="btn-secondary" id="regionalesGuardarBtn">Guardar borrador</button>
+            <button class="btn-primary" id="regionalesPublicarBtn" style="width:auto; padding:10px 20px;">Publicar cambios</button>
+          </div>
+        </div>
+        <div id="regionalesList" class="list-editor"></div>
+      </div>
+
+      <!-- Junta directiva -->
+      <div id="content-junta" class="content-panel" hidden>
+        <div class="publish-bar">
+          <span id="juntaEstadoLbl" class="mono-note"></span>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-secondary" id="juntaAgregarBtn">+ Agregar miembro</button>
+            <button class="btn-secondary" id="juntaGuardarBtn">Guardar borrador</button>
+            <button class="btn-primary" id="juntaPublicarBtn" style="width:auto; padding:10px 20px;">Publicar cambios</button>
+          </div>
+        </div>
+        <div id="juntaList" class="list-editor"></div>
+      </div>
+
+      <!-- Galería -->
+      <div id="content-galeria" class="content-panel" hidden>
+        <div class="publish-bar">
+          <span id="galeriaEstadoLbl" class="mono-note"></span>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-secondary" id="galeriaAgregarBtn">+ Agregar foto</button>
+            <button class="btn-secondary" id="galeriaGuardarBtn">Guardar borrador</button>
+            <button class="btn-primary" id="galeriaPublicarBtn" style="width:auto; padding:10px 20px;">Publicar cambios</button>
+          </div>
+        </div>
+        <div id="galeriaList" class="list-editor"></div>
       </div>
     </section>
 
@@ -189,6 +268,43 @@
       <div class="modal-actions">
         <button type="button" class="btn-secondary" id="afiliadoModalCancel">Cancelar</button>
         <button type="submit" class="btn-primary" id="afiliadoModalSave" style="width:auto; padding:10px 22px;">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL noticia ===================== -->
+<div id="noticiaModal" class="modal-backdrop" hidden>
+  <div class="modal-card">
+    <h2 id="noticiaModalTitle">Nueva noticia</h2>
+    <form id="noticiaForm">
+      <input type="hidden" id="ni_id">
+      <div class="modal-grid">
+        <div class="admin-field full"><label>Título *</label><input type="text" id="ni_titulo" required></div>
+        <div class="admin-field"><label>Región</label>
+          <select id="ni_region">
+            <option>Bogotá D.C.</option>
+            <option>Medellín</option>
+            <option>Cali</option>
+            <option>Barranquilla</option>
+            <option>Bucaramanga</option>
+          </select>
+        </div>
+        <div class="admin-field"><label>Fecha</label><input type="date" id="ni_fecha"></div>
+        <div class="admin-field full"><label>Resumen (opcional, se destaca en el artículo)</label><input type="text" id="ni_resumen"></div>
+        <div class="admin-field full"><label>URL de la imagen (opcional)</label><input type="text" id="ni_imagen_url" placeholder="assets/foto-1.jpg o https://…"></div>
+        <div class="admin-field full"><label>Contenido completo</label><textarea id="ni_contenido" rows="8" style="width:100%; padding:10px 12px; border:1px solid var(--linea); border-radius:8px; font-family:'Inter',sans-serif; font-size:0.9rem;"></textarea></div>
+        <div class="admin-field full">
+          <label class="checkbox-inline">
+            <input type="checkbox" id="ni_publicada">
+            Publicada (visible en el sitio público de inmediato)
+          </label>
+        </div>
+      </div>
+      <div id="noticiaFormError" class="admin-error" hidden style="margin-top:16px;"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="noticiaModalCancel">Cancelar</button>
+        <button type="submit" class="btn-primary" id="noticiaModalSave" style="width:auto; padding:10px 22px;">Guardar</button>
       </div>
     </form>
   </div>

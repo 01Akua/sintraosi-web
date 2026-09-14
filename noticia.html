@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Noticia — SINTRAOSI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,800;0,9..144,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .noticia-body{max-width:760px; margin:0 auto; padding:56px 28px;}
+  .noticia-body img.portada{width:100%; border-radius:14px; margin-bottom:28px;}
+  .noticia-body .cuerpo{font-size:1.02rem; line-height:1.75; color:var(--texto); white-space:pre-wrap;}
+  .noticia-body .meta{font-family:'IBM Plex Mono'; font-size:0.75rem; color:var(--texto-mute); margin-bottom:10px;}
+  .noticia-vacia{text-align:center; padding:80px 28px; color:var(--texto-mute);}
+</style>
+</head>
+<body data-page="noticias">
+
+<div id="header-placeholder"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="breadcrumb"><a href="index.html">Inicio</a> / <a href="noticias.html">Noticias</a> / <span>Artículo</span></div>
+    <h1 id="n-titulo">Cargando…</h1>
+  </div>
+</section>
+
+<div class="noticia-body" id="n-contenedor">
+  <div class="noticia-vacia">Cargando noticia…</div>
+</div>
+
+<div id="footer-placeholder"></div>
+<script src="assets/firebase-config.js"></script>
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+function escapeHtml(s){ return (s ?? "").toString().replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+async function cargar(){
+  const params = new URLSearchParams(location.search);
+  const id = params.get("id");
+  const cont = document.getElementById("n-contenedor");
+  if(!id || !window.SINTRAOSI_FIREBASE_CONFIG){
+    cont.innerHTML = '<div class="noticia-vacia">No se encontró la noticia.</div>';
+    return;
+  }
+  try{
+    const app = getApps().length ? getApps()[0] : initializeApp(window.SINTRAOSI_FIREBASE_CONFIG);
+    const db = getFirestore(app);
+    const snap = await getDoc(doc(db, "noticias", id));
+    if(!snap.exists() || snap.data().estado !== "publicado"){
+      cont.innerHTML = '<div class="noticia-vacia">No se encontró la noticia.</div>';
+      return;
+    }
+    const n = snap.data();
+    document.title = `${n.titulo} — SINTRAOSI`;
+    document.getElementById("n-titulo").textContent = n.titulo;
+    cont.innerHTML = `
+      ${n.imagen_url ? `<img class="portada" src="${escapeHtml(n.imagen_url)}" alt="${escapeHtml(n.titulo)}">` : ""}
+      <div class="meta">SINTRAOSI ${escapeHtml(n.region)}${n.fecha ? " · " + escapeHtml(n.fecha) : ""}</div>
+      ${n.resumen ? `<p style="font-weight:600; font-size:1.1rem; margin-bottom:18px;">${escapeHtml(n.resumen)}</p>` : ""}
+      <div class="cuerpo">${escapeHtml(n.contenido || "Contenido completo próximamente.")}</div>
+    `;
+  }catch(err){
+    console.error(err);
+    cont.innerHTML = '<div class="noticia-vacia">No se pudo cargar la noticia.</div>';
+  }
+}
+cargar();
+</script>
+<script src="assets/main.js"></script>
+</body>
+</html>

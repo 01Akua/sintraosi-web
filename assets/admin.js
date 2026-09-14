@@ -93,15 +93,20 @@ onAuthStateChanged(auth, async (user) => {
 // ---------------------------------------------------------------------------
 // Tabs
 // ---------------------------------------------------------------------------
+let CONTENIDO_CARGADO = false;
 document.querySelectorAll(".admin-tab").forEach((tabEl) => {
   tabEl.addEventListener("click", () => {
     document.querySelectorAll(".admin-tab").forEach((t) => t.classList.remove("active"));
     tabEl.classList.add("active");
     const target = tabEl.dataset.tab;
-    ["dashboard", "afiliados", "usuarios"].forEach((name) => {
+    ["dashboard", "afiliados", "contenido", "usuarios"].forEach((name) => {
       $(`tab-${name}`).hidden = name !== target;
     });
     if (target === "usuarios") cargarAdmins();
+    if (target === "contenido" && !CONTENIDO_CARGADO) {
+      CONTENIDO_CARGADO = true;
+      cargarContenido();
+    }
   });
 });
 
@@ -429,3 +434,349 @@ $("adminsTbody").addEventListener("click", async (e) => {
   mostrarToast("Acceso revocado.");
   cargarAdmins();
 });
+
+// =============================================================================
+// Contenido del sitio (CMS): noticias + textos/listas de páginas
+// =============================================================================
+
+document.querySelectorAll(".content-subtab").forEach((tabEl) => {
+  tabEl.addEventListener("click", () => {
+    document.querySelectorAll(".content-subtab").forEach((t) => t.classList.remove("active"));
+    tabEl.classList.add("active");
+    const target = tabEl.dataset.subtab;
+    ["noticias", "inicio", "regionales", "junta", "galeria"].forEach((name) => {
+      $(`content-${name}`).hidden = name !== target;
+    });
+  });
+});
+
+async function cargarContenido() {
+  await Promise.all([
+    cargarNoticiasAdmin(),
+    cargarPaginaAdmin("inicio"),
+    cargarPaginaAdmin("regionales"),
+    cargarPaginaAdmin("junta"),
+    cargarPaginaAdmin("galeria"),
+  ]);
+}
+
+// ---------------------------------------------------------------------------
+// Noticias
+// ---------------------------------------------------------------------------
+let NOTICIAS = [];
+
+async function cargarNoticiasAdmin() {
+  const snap = await getDocs(collection(db, "noticias"));
+  NOTICIAS = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  NOTICIAS.sort((a, b) => (a.orden || 0) - (b.orden || 0));
+  renderNoticiasTabla();
+}
+
+function renderNoticiasTabla() {
+  $("noticiasTbody").innerHTML = NOTICIAS.map((n, idx) => `
+    <tr>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" data-action="subir" data-id="${n.id}" ${idx === 0 ? "disabled" : ""}>↑</button>
+          <button class="icon-btn" data-action="bajar" data-id="${n.id}" ${idx === NOTICIAS.length - 1 ? "disabled" : ""}>↓</button>
+        </div>
+      </td>
+      <td>${escapeHtml(n.titulo)}</td>
+      <td>${escapeHtml(n.region || "—")}</td>
+      <td><span class="badge ${n.estado === "publicado" ? "badge-publicado" : "badge-borrador"}">${n.estado === "publicado" ? "Publicado" : "Borrador"}</span></td>
+      <td>${escapeHtml(n.fecha || "—")}</td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" data-action="editar" data-id="${n.id}">Editar</button>
+          <button class="icon-btn" data-action="toggle-estado" data-id="${n.id}">${n.estado === "publicado" ? "Despublicar" : "Publicar"}</button>
+          <button class="icon-btn" data-action="eliminar" data-id="${n.id}">Eliminar</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="6" class="loading-row">No hay noticias todavía.</td></tr>`;
+}
+
+async function moverNoticia(id, direccion) {
+  const idx = NOTICIAS.findIndex((n) => n.id === id);
+  const vecino = direccion === "subir" ? idx - 1 : idx + 1;
+  if (vecino < 0 || vecino >= NOTICIAS.length) return;
+  const a = NOTICIAS[idx], b = NOTICIAS[vecino];
+  const ordenA = a.orden, ordenB = b.orden;
+  await Promise.all([
+    setDoc(doc(db, "noticias", a.id), { orden: ordenB }, { merge: true }),
+    setDoc(doc(db, "noticias", b.id), { orden: ordenA }, { merge: true }),
+  ]);
+  await cargarNoticiasAdmin();
+}
+
+$("noticiasTbody").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const noticia = NOTICIAS.find((n) => n.id === id);
+  const accion = btn.dataset.action;
+  if (accion === "subir" || accion === "bajar") {
+    await moverNoticia(id, accion === "subir" ? "subir" : "bajar");
+  } else if (accion === "editar") {
+    abrirModalNoticia(noticia);
+  } else if (accion === "toggle-estado") {
+    const nuevoEstado = noticia.estado === "publicado" ? "borrador" : "publicado";
+    await setDoc(doc(db, "noticias", id), { estado: nuevoEstado }, { merge: true });
+    mostrarToast(nuevoEstado === "publicado" ? "Noticia publicada." : "Noticia despublicada.");
+    await cargarNoticiasAdmin();
+  } else if (accion === "eliminar") {
+    if (!confirm(`¿Eliminar la noticia "${noticia.titulo}"? Esta acción no se puede deshacer.`)) return;
+    await deleteDoc(doc(db, "noticias", id));
+    mostrarToast("Noticia eliminada.");
+    await cargarNoticiasAdmin();
+  }
+});
+
+function abrirModalNoticia(noticia) {
+  $("noticiaFormError").hidden = true;
+  $("noticiaForm").reset();
+  if (noticia) {
+    $("noticiaModalTitle").textContent = "Editar noticia";
+    $("ni_id").value = noticia.id;
+    $("ni_titulo").value = noticia.titulo || "";
+    $("ni_region").value = noticia.region || "Bogotá D.C.";
+    $("ni_fecha").value = noticia.fecha || "";
+    $("ni_resumen").value = noticia.resumen || "";
+    $("ni_imagen_url").value = noticia.imagen_url || "";
+    $("ni_contenido").value = noticia.contenido || "";
+    $("ni_publicada").checked = noticia.estado === "publicado";
+  } else {
+    $("noticiaModalTitle").textContent = "Nueva noticia";
+    $("ni_id").value = "";
+    $("ni_publicada").checked = false;
+  }
+  $("noticiaModal").hidden = false;
+}
+
+$("openNewNoticiaBtn").addEventListener("click", () => abrirModalNoticia(null));
+$("noticiaModalCancel").addEventListener("click", () => { $("noticiaModal").hidden = true; });
+
+$("noticiaForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("noticiaFormError");
+  err.hidden = true;
+  const titulo = $("ni_titulo").value.trim();
+  if (!titulo) {
+    err.textContent = "El título es obligatorio.";
+    err.hidden = false;
+    return;
+  }
+  const idExistente = $("ni_id").value;
+  const data = {
+    titulo,
+    region: $("ni_region").value,
+    fecha: $("ni_fecha").value || "",
+    resumen: $("ni_resumen").value.trim(),
+    imagen_url: $("ni_imagen_url").value.trim(),
+    contenido: $("ni_contenido").value.trim(),
+    estado: $("ni_publicada").checked ? "publicado" : "borrador",
+    actualizado_en: new Date().toISOString(),
+  };
+  const btn = $("noticiaModalSave");
+  btn.disabled = true;
+  btn.textContent = "Guardando…";
+  try {
+    if (idExistente) {
+      await setDoc(doc(db, "noticias", idExistente), data, { merge: true });
+    } else {
+      const nuevoRef = doc(collection(db, "noticias"));
+      const maxOrden = NOTICIAS.reduce((m, n) => Math.max(m, n.orden || 0), 0);
+      await setDoc(nuevoRef, { ...data, orden: maxOrden + 1, creado_en: new Date().toISOString() });
+    }
+    $("noticiaModal").hidden = true;
+    mostrarToast("Noticia guardada.");
+    await cargarNoticiasAdmin();
+  } catch (e2) {
+    err.textContent = "No se pudo guardar. Intenta de nuevo.";
+    err.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Guardar";
+  }
+});
+
+// ---------------------------------------------------------------------------
+// Páginas: textos (campos) + listas reordenables — patrón borrador/publicado
+// ---------------------------------------------------------------------------
+const PAGINAS = {}; // pageId -> { borrador: {campos,listas}, publicado: {campos,listas} }
+
+const CAMPOS_INICIO = [
+  { key: "hero_tagline", label: "Hero — etiqueta superior" },
+  { key: "hero_titulo_1", label: "Hero — título (línea 1)" },
+  { key: "hero_titulo_2", label: "Hero — título (línea 2, en cursiva)" },
+  { key: "hero_lede", label: "Hero — texto", textarea: true },
+  { key: "quienes_tag", label: "Quiénes somos — etiqueta" },
+  { key: "quienes_titulo", label: "Quiénes somos — título" },
+  { key: "quienes_p1", label: "Quiénes somos — párrafo 1", textarea: true },
+  { key: "quienes_p2", label: "Quiénes somos — párrafo 2", textarea: true },
+  { key: "noticias_tag", label: "Sección noticias — etiqueta" },
+  { key: "noticias_titulo", label: "Sección noticias — título" },
+  { key: "noticias_p", label: "Sección noticias — texto" },
+  { key: "regionales_tag", label: "Sección regionales — etiqueta" },
+  { key: "regionales_titulo", label: "Sección regionales — título" },
+  { key: "regionales_p", label: "Sección regionales — texto" },
+  { key: "galeria_tag", label: "Sección galería — etiqueta" },
+  { key: "galeria_titulo", label: "Sección galería — título" },
+  { key: "galeria_p", label: "Sección galería — texto" },
+  { key: "cta_titulo", label: "CTA final — título" },
+  { key: "cta_p", label: "CTA final — texto", textarea: true },
+];
+
+const FIELDS_REGIONALES = [
+  { key: "ciudad", label: "Ciudad" },
+  { key: "etiqueta", label: "Etiqueta" },
+  { key: "texto", label: "Texto (opcional)" },
+];
+const FIELDS_JUNTA = [
+  { key: "iniciales", label: "Iniciales" },
+  { key: "nombre", label: "Nombre completo" },
+  { key: "cargo", label: "Cargo" },
+];
+const FIELDS_GALERIA = [
+  { key: "imagen_url", label: "URL de la imagen" },
+  { key: "caption", label: "Descripción" },
+];
+
+async function cargarPaginaAdmin(pageId) {
+  const [bSnap, pSnap] = await Promise.all([
+    getDoc(doc(db, "paginas_borrador", pageId)),
+    getDoc(doc(db, "paginas_publicado", pageId)),
+  ]);
+  PAGINAS[pageId] = {
+    borrador: bSnap.exists() ? bSnap.data() : { campos: {}, listas: {} },
+    publicado: pSnap.exists() ? pSnap.data() : { campos: {}, listas: {} },
+  };
+  if (!PAGINAS[pageId].borrador.campos) PAGINAS[pageId].borrador.campos = {};
+  if (!PAGINAS[pageId].borrador.listas) PAGINAS[pageId].borrador.listas = {};
+
+  if (pageId === "inicio") {
+    renderCamposForm($("inicioForm"), "inicio", CAMPOS_INICIO);
+    actualizarEstadoLbl("inicio");
+  } else if (pageId === "regionales") {
+    if (!PAGINAS.regionales.borrador.listas.regionales) PAGINAS.regionales.borrador.listas.regionales = [];
+    renderListEditor("regionales", "regionales", FIELDS_REGIONALES);
+    actualizarEstadoLbl("regionales");
+  } else if (pageId === "junta") {
+    if (!PAGINAS.junta.borrador.listas.junta) PAGINAS.junta.borrador.listas.junta = [];
+    renderListEditor("junta", "junta", FIELDS_JUNTA);
+    actualizarEstadoLbl("junta");
+  } else if (pageId === "galeria") {
+    if (!PAGINAS.galeria.borrador.listas.galeria) PAGINAS.galeria.borrador.listas.galeria = [];
+    renderListEditor("galeria", "galeria", FIELDS_GALERIA);
+    actualizarEstadoLbl("galeria");
+  }
+}
+
+function actualizarEstadoLbl(pageId) {
+  const p = PAGINAS[pageId].publicado;
+  const fecha = p.publicado_en ? new Date(p.publicado_en).toLocaleString("es-CO") : "nunca";
+  $(`${pageId}EstadoLbl`).textContent = `Última publicación: ${fecha}`;
+}
+
+function renderCamposForm(containerEl, pageId, config) {
+  const campos = PAGINAS[pageId].borrador.campos;
+  containerEl.innerHTML = config.map((f) => `
+    <div class="admin-field ${f.textarea ? "full" : ""}">
+      <label>${escapeHtml(f.label)}</label>
+      ${f.textarea
+        ? `<textarea rows="3" data-campo="${f.key}">${escapeHtml(campos[f.key] || "")}</textarea>`
+        : `<input type="text" data-campo="${f.key}" value="${escapeHtml(campos[f.key] || "")}">`}
+    </div>
+  `).join("");
+  containerEl.querySelectorAll("[data-campo]").forEach((el) => {
+    el.addEventListener("input", () => {
+      PAGINAS[pageId].borrador.campos[el.dataset.campo] = el.value;
+    });
+  });
+}
+
+function renderListEditor(pageId, listId, fieldsConfig) {
+  const items = PAGINAS[pageId].borrador.listas[listId];
+  const container = $(`${listId}List`);
+  if (!items.length) {
+    container.innerHTML = `<p style="color:var(--texto-mute); font-size:0.85rem;">Sin elementos todavía. Usa "+ Agregar" para crear el primero.</p>`;
+    return;
+  }
+  container.innerHTML = items.map((item, idx) => `
+    <div class="list-item" data-idx="${idx}">
+      <div class="list-item-fields">
+        ${fieldsConfig.map((f) => `<input type="text" data-field="${f.key}" placeholder="${escapeHtml(f.label)}" value="${escapeHtml(item[f.key] || "")}">`).join("")}
+      </div>
+      <div class="list-item-actions">
+        <button type="button" data-action="up" ${idx === 0 ? "disabled" : ""}>↑</button>
+        <button type="button" data-action="down" ${idx === items.length - 1 ? "disabled" : ""}>↓</button>
+        <button type="button" data-action="del" class="danger">✕</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function attachListEditorEvents(pageId, listId, fieldsConfig) {
+  const container = $(`${listId}List`);
+  container.addEventListener("input", (e) => {
+    const fieldEl = e.target.closest("[data-field]");
+    if (!fieldEl) return;
+    const idx = parseInt(fieldEl.closest(".list-item").dataset.idx, 10);
+    PAGINAS[pageId].borrador.listas[listId][idx][fieldEl.dataset.field] = fieldEl.value;
+  });
+  container.addEventListener("click", (e) => {
+    const btn = e.target.closest("button[data-action]");
+    if (!btn) return;
+    const idx = parseInt(btn.closest(".list-item").dataset.idx, 10);
+    const items = PAGINAS[pageId].borrador.listas[listId];
+    if (btn.dataset.action === "up" && idx > 0) {
+      [items[idx - 1], items[idx]] = [items[idx], items[idx - 1]];
+    } else if (btn.dataset.action === "down" && idx < items.length - 1) {
+      [items[idx + 1], items[idx]] = [items[idx], items[idx + 1]];
+    } else if (btn.dataset.action === "del") {
+      items.splice(idx, 1);
+    }
+    renderListEditor(pageId, listId, fieldsConfig);
+  });
+}
+attachListEditorEvents("regionales", "regionales", FIELDS_REGIONALES);
+attachListEditorEvents("junta", "junta", FIELDS_JUNTA);
+attachListEditorEvents("galeria", "galeria", FIELDS_GALERIA);
+
+$("regionalesAgregarBtn").addEventListener("click", () => {
+  PAGINAS.regionales.borrador.listas.regionales.push({ ciudad: "", etiqueta: "", texto: "" });
+  renderListEditor("regionales", "regionales", FIELDS_REGIONALES);
+});
+$("juntaAgregarBtn").addEventListener("click", () => {
+  PAGINAS.junta.borrador.listas.junta.push({ iniciales: "", nombre: "", cargo: "" });
+  renderListEditor("junta", "junta", FIELDS_JUNTA);
+});
+$("galeriaAgregarBtn").addEventListener("click", () => {
+  PAGINAS.galeria.borrador.listas.galeria.push({ imagen_url: "", caption: "" });
+  renderListEditor("galeria", "galeria", FIELDS_GALERIA);
+});
+
+async function guardarBorrador(pageId) {
+  const data = { ...PAGINAS[pageId].borrador, actualizado_en: new Date().toISOString() };
+  await setDoc(doc(db, "paginas_borrador", pageId), data);
+  PAGINAS[pageId].borrador = data;
+  mostrarToast("Borrador guardado.");
+}
+
+async function publicarPagina(pageId) {
+  await guardarBorrador(pageId);
+  const data = { ...PAGINAS[pageId].borrador, publicado_en: new Date().toISOString() };
+  await setDoc(doc(db, "paginas_publicado", pageId), data);
+  PAGINAS[pageId].publicado = data;
+  actualizarEstadoLbl(pageId);
+  mostrarToast("Cambios publicados. Ya son visibles en el sitio.");
+}
+
+$("inicioGuardarBtn").addEventListener("click", () => guardarBorrador("inicio"));
+$("inicioPublicarBtn").addEventListener("click", () => publicarPagina("inicio"));
+$("regionalesGuardarBtn").addEventListener("click", () => guardarBorrador("regionales"));
+$("regionalesPublicarBtn").addEventListener("click", () => publicarPagina("regionales"));
+$("juntaGuardarBtn").addEventListener("click", () => guardarBorrador("junta"));
+$("juntaPublicarBtn").addEventListener("click", () => publicarPagina("junta"));
+$("galeriaGuardarBtn").addEventListener("click", () => guardarBorrador("galeria"));
+$("galeriaPublicarBtn").addEventListener("click", () => publicarPagina("galeria"));

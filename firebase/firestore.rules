@@ -43,5 +43,28 @@ service cloud.firestore {
       allow create: if esAdmin();
       allow update, delete: if false;
     }
+
+    // ---- Contenido editable del sitio público (CMS) ----
+
+    // noticias/{id}: artículo con estado 'borrador' o 'publicado'. El sitio
+    // público solo puede leer los publicados; el panel (autenticado) ve todo.
+    match /noticias/{id} {
+      allow read: if resource.data.estado == 'publicado' || esAdmin();
+      allow write: if esAdmin();
+    }
+
+    // paginas_borrador/{pageId}: copia de trabajo de los textos/listas de una
+    // página (solo el panel la lee y edita).
+    match /paginas_borrador/{pageId} {
+      allow read, write: if esAdmin();
+    }
+
+    // paginas_publicado/{pageId}: lo que el sitio público realmente muestra.
+    // Lectura abierta a cualquiera (es contenido público del sitio); solo un
+    // admin puede escribir, y solo lo hace vía el botón "Publicar" del panel.
+    match /paginas_publicado/{pageId} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
   }
 }

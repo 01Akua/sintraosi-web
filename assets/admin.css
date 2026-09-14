@@ -375,6 +375,99 @@ table.admin-table tbody tr:hover{background:var(--papel-2);}
 
 .loading-row{padding:40px; text-align:center; color:var(--texto-mute); font-size:0.9rem;}
 
+/* ---- Contenido del sitio (CMS) ---- */
+.content-subtabs{
+  display:flex;
+  gap:6px;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+  border-bottom:1px solid var(--linea);
+  padding-bottom:2px;
+}
+.content-subtab{
+  padding:8px 14px;
+  font-size:0.82rem;
+  font-weight:600;
+  color:var(--texto-mute);
+  cursor:pointer;
+  border-radius:8px 8px 0 0;
+}
+.content-subtab.active{color:var(--blue-700); background:var(--sky-100);}
+.content-panel{}
+
+.publish-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-bottom:18px;
+}
+.mono-note{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.72rem;
+  color:var(--texto-mute);
+}
+
+.content-form{
+  background:#fff;
+  border:1px solid var(--linea);
+  border-radius:14px;
+  padding:22px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  max-width:900px;
+}
+.content-form .admin-field.full{grid-column:1/-1;}
+.content-form textarea{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--linea);
+  border-radius:8px;
+  font-family:'Inter',sans-serif;
+  font-size:0.9rem;
+  resize:vertical;
+}
+
+.list-editor{display:flex; flex-direction:column; gap:10px; max-width:900px;}
+.list-item{
+  background:#fff;
+  border:1px solid var(--linea);
+  border-radius:12px;
+  padding:14px 16px;
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+}
+.list-item .list-item-fields{
+  flex:1;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:10px;
+}
+.list-item .list-item-fields input{
+  width:100%;
+  padding:8px 10px;
+  border:1px solid var(--linea);
+  border-radius:6px;
+  font-size:0.85rem;
+}
+.list-item-actions{display:flex; flex-direction:column; gap:4px;}
+.list-item-actions button{
+  border:1px solid var(--linea);
+  background:#fff;
+  border-radius:6px;
+  padding:4px 8px;
+  font-size:0.72rem;
+  cursor:pointer;
+  min-width:34px;
+}
+.list-item-actions button:hover{border-color:var(--blue-600); color:var(--blue-700);}
+.list-item-actions button.danger:hover{border-color:var(--rojo); color:var(--rojo);}
+.badge-borrador{background:var(--papel-2); color:var(--texto-mute);}
+.badge-publicado{background:var(--sky-100); color:var(--blue-800);}
+
 @media (max-width:640px){
   .modal-grid{grid-template-columns:1fr;}
   .admin-main{padding:16px;}
