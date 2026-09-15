@@ -27,6 +27,7 @@ const SLUGS_REGIONALES = {
   "Medellín": "medellin",
   "Cali": "cali",
   "Barranquilla": "barranquilla",
+  "Cartagena": "cartagena",
   "Bucaramanga": "bucaramanga",
   "Villavicencio": "villavicencio",
   "Ibagué": "ibague",
