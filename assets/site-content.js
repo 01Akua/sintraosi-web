@@ -20,19 +20,35 @@ function aplicarCampos(campos) {
   });
 }
 
+// Slugs de las subpáginas regional-<slug>.html — si una ciudad no está aquí,
+// las tarjetas enlazan a noticias.html en vez de una subpágina inexistente.
+const SLUGS_REGIONALES = {
+  "Bogotá D.C.": "bogota",
+  "Medellín": "medellin",
+  "Cali": "cali",
+  "Barranquilla": "barranquilla",
+  "Bucaramanga": "bucaramanga",
+  "Villavicencio": "villavicencio",
+  "Ibagué": "ibague",
+};
+
 // ---- Renderers de listas: listId -> (contenedor, items) => void ----
 const RENDERERS = {
   regionales(container, items, limite) {
     const datos = limite ? items.slice(0, limite) : items;
-    let html = datos.map((it) => `
+    let html = datos.map((it) => {
+      const slug = SLUGS_REGIONALES[it.ciudad];
+      const href = slug ? `regional-${slug}.html` : "noticias.html";
+      return `
       <div class="reg-card">
         <div class="reg-code">${escapeHtml(it.ciudad || "").slice(0, 3).toUpperCase()}</div>
         <div class="reg-city">${escapeHtml(it.ciudad)}</div>
         <div class="reg-tag">${escapeHtml(it.etiqueta)}</div>
         ${it.texto ? `<p style="font-size:0.85rem; color:var(--texto-mute); margin-top:6px;">${escapeHtml(it.texto)}</p>` : ""}
-        <a href="noticias.html" class="reg-link">Ver noticias →</a>
+        <a href="${href}" class="reg-link">Ver regional →</a>
       </div>
-    `).join("");
+    `;
+    }).join("");
     // Tarjeta fija de "contáctanos" al final, solo en la página completa de regionales.
     if (container.dataset.cmsExtraCard === "contacto") {
       html += `
@@ -91,7 +107,11 @@ async function cargarNoticias(db) {
   const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
   contenedores.forEach((el) => {
     const limite = el.dataset.cmsLimite ? parseInt(el.dataset.cmsLimite, 10) : null;
-    const datos = limite ? items.slice(0, limite) : items;
+    const region = el.dataset.cmsRegion || null;
+    // El filtro por región se hace en el cliente (no en la consulta) para no
+    // depender de un índice compuesto de Firestore por región + estado + orden.
+    let datos = region ? items.filter((n) => n.region === region) : items;
+    if (limite) datos = datos.slice(0, limite);
     if (!datos.length) return; // sin datos: deja el contenido estático de respaldo
     el.innerHTML = datos.map(renderNoticiaCard).join("");
   });
