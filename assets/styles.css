@@ -164,18 +164,26 @@ nav.links a.active::after{width:100%; background:var(--blue-400);}
 }
 
 /* ---------- aliados band with photo backdrop ---------- */
-.aliados{position:relative; background-size:cover; background-position:center 30%; overflow:hidden; padding:48px 0; border-top:1px solid var(--linea);}
-.aliados::before{content:""; position:absolute; inset:0; background:linear-gradient(100deg, rgba(12,39,67,0.94) 25%, rgba(17,55,98,0.8) 100%);}
+.aliados{position:relative; background-size:cover; background-position:center 30%; overflow:hidden; padding:52px 0; border-top:1px solid var(--linea);}
+.aliados::before{content:""; position:absolute; inset:0; background:linear-gradient(100deg, rgba(9,29,50,0.95) 0%, rgba(12,39,67,0.93) 100%);}
 .aliados .wrap{position:relative; z-index:1;}
-.aliados-row{display:flex; gap:36px; align-items:center; justify-content:center; flex-wrap:wrap; opacity:0.85;}
-.aliado-logo{
-  background:#fff; border-radius:10px; padding:12px 22px;
-  display:flex; align-items:center; justify-content:center;
-  box-shadow:0 6px 18px -8px rgba(0,0,0,0.35);
-  transition:transform .2s ease, box-shadow .2s ease;
+.aliados-label{
+  text-align:center; font-family:'IBM Plex Mono'; font-size:0.68rem; font-weight:600;
+  letter-spacing:0.1em; text-transform:uppercase; color:rgba(255,255,255,0.5);
+  margin-bottom:22px;
 }
-.aliado-logo:hover{transform:translateY(-3px); box-shadow:0 10px 24px -8px rgba(0,0,0,0.4);}
-.aliado-logo img{height:38px; width:auto; display:block;}
+.aliados-row{display:flex; gap:0; align-items:center; justify-content:center; flex-wrap:wrap;}
+.aliado-logo{
+  width:148px; height:84px; padding:18px;
+  display:flex; align-items:center; justify-content:center;
+  border-left:1px solid rgba(255,255,255,0.14);
+  transition:transform .2s ease, opacity .2s ease;
+  opacity:0.82;
+}
+.aliado-logo:first-child{border-left:none;}
+.aliado-logo:hover{transform:translateY(-3px); opacity:1;}
+.aliado-logo img{max-height:44px; max-width:100%; width:auto; display:block; object-fit:contain;
+  background:#fff; border-radius:8px; padding:8px 14px; box-shadow:0 8px 20px -10px rgba(0,0,0,0.45);}
 
 /* ---------- social row footer ---------- */
 .social-row{display:flex; gap:10px; margin-top:14px;}
