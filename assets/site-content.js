@@ -26,6 +26,7 @@ const RENDERERS = {
     const datos = limite ? items.slice(0, limite) : items;
     let html = datos.map((it) => `
       <div class="reg-card">
+        <div class="reg-code">${escapeHtml(it.ciudad || "").slice(0, 3).toUpperCase()}</div>
         <div class="reg-city">${escapeHtml(it.ciudad)}</div>
         <div class="reg-tag">${escapeHtml(it.etiqueta)}</div>
         ${it.texto ? `<p style="font-size:0.85rem; color:var(--texto-mute); margin-top:6px;">${escapeHtml(it.texto)}</p>` : ""}
@@ -68,8 +69,8 @@ function escapeAttr(s) { return escapeHtml(s); }
 
 function renderNoticiaCard(n) {
   const thumb = n.imagen_url
-    ? `<img src="${escapeAttr(n.imagen_url)}" alt="${escapeAttr(n.titulo)}" style="width:100%; height:100%; object-fit:cover;">`
-    : "IMAGEN — comunicado";
+    ? `<img src="${escapeAttr(n.imagen_url)}" alt="${escapeAttr(n.titulo)}">`
+    : `<span class="news-thumb-ph">IMAGEN — comunicado</span>`;
   return `
     <div class="news-card">
       <div class="news-thumb">${thumb}</div>

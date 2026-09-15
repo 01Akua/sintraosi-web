@@ -44,7 +44,7 @@ function initReveal(){
       }
     });
   }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
-  document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => io.observe(el));
+  document.querySelectorAll('.reveal, .reveal-stagger, .reveal-img').forEach(el => io.observe(el));
 }
 
 function initCounters(){
