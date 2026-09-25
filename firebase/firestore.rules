@@ -75,6 +75,14 @@ service cloud.firestore {
       allow write: if esAdmin();
     }
 
+    // eventos_calendario/{id}: fecha importante del sindicato (marcha, asamblea,
+    // aniversario, etc.), con fotos asociadas si el evento ya ocurrió. Mismo
+    // patrón borrador/publicado por documento que `noticias`.
+    match /eventos_calendario/{id} {
+      allow read: if resource.data.estado == 'publicado' || esAdmin();
+      allow write: if esAdmin();
+    }
+
     // ---- Votaciones (asamblea y elecciones) ----
     //
     // Los afiliados NO tienen cuenta de Firebase Auth, así que la identidad y el

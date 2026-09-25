@@ -466,13 +466,45 @@ section + section, .aliados + section, section + .aliados{border-top:1px solid v
 }
 .junta-card:hover{background:rgba(255,255,255,0.1); transform:translateY(-3px);}
 .junta-avatar{
-  width:48px; height:48px; border-radius:50%; flex-shrink:0;
+  width:48px; height:48px; border-radius:50%; flex-shrink:0; overflow:hidden;
   background:linear-gradient(135deg, var(--blue-600), var(--teal));
   display:flex; align-items:center; justify-content:center;
   font-family:'Source Serif 4'; font-weight:700; font-size:0.9rem;
 }
+.junta-avatar img{width:100%; height:100%; object-fit:cover;}
 .junta-name{font-weight:600; font-size:0.92rem;}
 .junta-role{font-size:0.76rem; color:rgba(255,255,255,0.6); margin-top:2px;}
+
+/* Organigrama por niveles — junta directiva nacional (fondo oscuro, hereda .junta-card) */
+.org-tier{display:flex; justify-content:center; flex-wrap:wrap; gap:22px; margin-bottom:22px;}
+.org-tier .junta-card{max-width:270px; width:100%;}
+.org-tier-1 .junta-card{background:rgba(82,172,222,0.14); border-color:var(--blue-400);}
+.org-tier-1 .junta-avatar, .org-tier-2 .junta-avatar{width:64px; height:64px; font-size:1.05rem;}
+.org-tier-label{
+  text-align:center; font-family:'IBM Plex Mono'; font-size:0.64rem; letter-spacing:0.1em;
+  text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:10px;
+}
+.org-connector{width:1px; height:22px; background:rgba(255,255,255,0.18); margin:0 auto 22px;}
+
+/* Organigrama de mesas regionales (fondo claro, subpáginas regional-*.html) */
+.org-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(170px,1fr)); gap:18px;}
+.org-card{
+  background:#fff; border:1px solid var(--linea); border-radius:14px; padding:22px 14px; text-align:center;
+  transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+}
+.org-card:hover{box-shadow:0 16px 30px -16px rgba(17,55,98,0.2); transform:translateY(-3px); border-color:var(--blue-400);}
+.org-photo{
+  width:84px; height:84px; border-radius:50%; overflow:hidden; margin:0 auto 14px;
+  background:linear-gradient(135deg, var(--blue-600), var(--teal));
+  display:flex; align-items:center; justify-content:center; color:#fff;
+  font-family:'Source Serif 4'; font-weight:700; font-size:1.1rem;
+}
+.org-photo img{width:100%; height:100%; object-fit:cover;}
+.org-card .org-name{font-weight:700; font-size:0.9rem; color:var(--navy-950);}
+.org-card .org-role{
+  font-size:0.7rem; color:var(--blue-700); margin-top:4px; font-family:'IBM Plex Mono';
+  text-transform:uppercase; letter-spacing:0.03em; line-height:1.4;
+}
 
 /* ---------- PRINCIPIOS ---------- */
 .principios{background:var(--papel);}
@@ -684,6 +716,8 @@ footer{background:var(--navy-950); color:rgba(255,255,255,0.7); padding:52px 0 2
   .quienes-grid, .mv-grid, .cta-grid, .cont-grid{grid-template-columns:1fr;}
   .junta-grid, .prin-grid, .news-grid, .hub-grid{grid-template-columns:repeat(2,1fr);}
   .valor-grid, .reg-grid, .reg-grid.reg-grid-3, .gal-grid, .form-grid, .upload-row{grid-template-columns:repeat(2,1fr);}
+  .org-grid{grid-template-columns:repeat(3,1fr);}
+  .org-tier .junta-card{max-width:none;}
   .foot-grid{grid-template-columns:1fr 1fr;}
   .doc-row{grid-template-columns:36px 1fr; row-gap:8px;}
   .doc-verified, .doc-dl{grid-column:2;}
@@ -692,6 +726,7 @@ footer{background:var(--navy-950); color:rgba(255,255,255,0.7); padding:52px 0 2
 }
 @media (max-width:640px){
   .junta-grid, .prin-grid, .news-grid, .hub-grid, .valor-grid, .reg-grid, .reg-grid.reg-grid-3, .gal-grid, .form-grid, .upload-row{grid-template-columns:1fr;}
+  .org-grid{grid-template-columns:repeat(2,1fr);}
   .doc-toolbar select{width:100%;}
   .hero-stats{grid-template-columns:1fr;}
 }

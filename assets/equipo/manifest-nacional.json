@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Darwin Acevedo",
+    "role": "Presidente",
+    "photo": "assets/equipo/nacional-darwin-acevedo.jpg"
+  },
+  {
+    "name": "Gustavo Ríos",
+    "role": "Vicepresidente",
+    "photo": "assets/equipo/nacional-gustavo-rios.jpg"
+  },
+  {
+    "name": "Kelly Díaz Becerra",
+    "role": "Secretaria",
+    "photo": "assets/equipo/nacional-kelly-diaz-becerra.jpg"
+  },
+  {
+    "name": "Mary López",
+    "role": "Fiscal",
+    "photo": "assets/equipo/nacional-mary-lopez.jpg"
+  },
+  {
+    "name": "Sandra Corredor",
+    "role": "Tesorera",
+    "photo": "assets/equipo/nacional-sandra-corredor.jpg"
+  },
+  {
+    "name": "Mónica Hoyos",
+    "role": "Secretaria mujer",
+    "photo": "assets/equipo/nacional-monica-hoyos.jpg"
+  },
+  {
+    "name": "Anyela Franco",
+    "role": "Secretaria asuntos Jurídicos",
+    "photo": "assets/equipo/nacional-anyela-franco.jpg"
+  },
+  {
+    "name": "Juan Carlos Molina",
+    "role": "Secretaria salud",
+    "photo": "assets/equipo/nacional-juan-carlos-molina.jpg"
+  },
+  {
+    "name": "Diego Álzate",
+    "role": "Prensa y propaganda",
+    "photo": "assets/equipo/nacional-diego-alzate.jpg"
+  },
+  {
+    "name": "Miguel Ángel Rodríguez",
+    "role": "Secretaria Bienestar",
+    "photo": "assets/equipo/nacional-miguel-angel-rodriguez.jpg"
+  }
+]

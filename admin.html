@@ -101,6 +101,7 @@
     <div class="admin-tab" data-tab="afiliados">Afiliados</div>
     <div class="admin-tab" data-tab="contenido">Contenido del sitio</div>
     <div class="admin-tab" data-tab="votaciones">Votaciones</div>
+    <div class="admin-tab" data-tab="calendario">Calendario</div>
     <div class="admin-tab" data-tab="usuarios">Usuarios del panel</div>
   </nav>
 
@@ -211,6 +212,16 @@
           </div>
         </div>
         <div id="regionalesList" class="list-editor"></div>
+
+        <h3 style="margin:32px 0 12px; font-size:0.95rem; color:var(--navy-950);">Organigrama — Mesa Regional Ibagué</h3>
+        <p style="color:var(--texto-mute); font-size:0.82rem; margin-bottom:12px;">Se muestra en regional-ibague.html. Usa los mismos botones "Guardar borrador" / "Publicar cambios" de arriba (es la misma página).</p>
+        <div style="margin-bottom:10px;"><button class="btn-secondary" id="mesaIbagueAgregarBtn">+ Agregar miembro</button></div>
+        <div id="mesa_ibagueList" class="list-editor"></div>
+
+        <h3 style="margin:32px 0 12px; font-size:0.95rem; color:var(--navy-950);">Organigrama — Mesa Regional Medellín</h3>
+        <p style="color:var(--texto-mute); font-size:0.82rem; margin-bottom:12px;">Se muestra en regional-medellin.html.</p>
+        <div style="margin-bottom:10px;"><button class="btn-secondary" id="mesaMedellinAgregarBtn">+ Agregar miembro</button></div>
+        <div id="mesa_medellinList" class="list-editor"></div>
       </div>
 
       <!-- Junta directiva -->
@@ -253,6 +264,23 @@
         <table class="admin-table">
           <thead><tr><th>Título</th><th>Tipo</th><th>Estado</th><th>Participación</th><th></th></tr></thead>
           <tbody id="votacionesTbody"><tr><td colspan="5" class="loading-row">Cargando votaciones…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ---- TAB: calendario ---- -->
+    <section id="tab-calendario" hidden>
+      <div class="filters-bar">
+        <p style="flex:1; color:var(--texto-mute); font-size:0.85rem; margin:0;">
+          Los eventos <strong>publicados</strong> se ven en <a href="calendario.html" target="_blank">calendario.html</a>.
+          Si la fecha ya pasó, agrega las URLs de las fotos (una por línea) para que queden asociadas a ese evento.
+        </p>
+        <button class="btn-primary" id="openNewEventoBtn" style="width:auto; white-space:nowrap;">+ Nuevo evento</button>
+      </div>
+      <div class="table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Fecha</th><th>Título</th><th>Categoría</th><th>Fotos</th><th>Estado</th><th></th></tr></thead>
+          <tbody id="eventosTbody"><tr><td colspan="6" class="loading-row">Cargando eventos…</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -375,6 +403,46 @@
       <div class="modal-actions">
         <button type="button" class="btn-secondary" id="noticiaModalCancel">Cancelar</button>
         <button type="submit" class="btn-primary" id="noticiaModalSave" style="width:auto; padding:10px 22px;">Guardar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== MODAL evento de calendario ===================== -->
+<div id="eventoModal" class="modal-backdrop" hidden>
+  <div class="modal-card">
+    <h2 id="eventoModalTitle">Nuevo evento</h2>
+    <form id="eventoForm">
+      <input type="hidden" id="ev_id">
+      <div class="modal-grid">
+        <div class="admin-field full"><label>Título *</label><input type="text" id="ev_titulo" required placeholder="Marcha del Primero de Mayo — Ibagué"></div>
+        <div class="admin-field"><label>Fecha *</label><input type="date" id="ev_fecha" required></div>
+        <div class="admin-field"><label>Categoría</label>
+          <select id="ev_categoria">
+            <option value="marcha">Marcha / movilización</option>
+            <option value="asamblea">Asamblea</option>
+            <option value="aniversario">Aniversario</option>
+            <option value="capacitacion">Capacitación</option>
+            <option value="eleccion">Elección</option>
+            <option value="otro">Actividad</option>
+          </select>
+        </div>
+        <div class="admin-field full"><label>Descripción (opcional)</label><textarea id="ev_descripcion" rows="3" style="width:100%; padding:10px 12px; border:1px solid var(--linea); border-radius:8px; font-family:'Inter',sans-serif; font-size:0.9rem;"></textarea></div>
+        <div class="admin-field full">
+          <label>Fotos del evento (opcional — una URL por línea; útil cuando el evento ya pasó)</label>
+          <textarea id="ev_fotos" rows="4" placeholder="assets/marcha-1-mayo/foto-1.jpg" style="width:100%; padding:10px 12px; border:1px solid var(--linea); border-radius:8px; font-family:'IBM Plex Mono',monospace; font-size:0.82rem;"></textarea>
+        </div>
+        <div class="admin-field full">
+          <label class="checkbox-inline">
+            <input type="checkbox" id="ev_publicado">
+            Publicado (visible en calendario.html de inmediato)
+          </label>
+        </div>
+      </div>
+      <div id="eventoFormError" class="admin-error" hidden style="margin-top:16px;"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="eventoModalCancel">Cancelar</button>
+        <button type="submit" class="btn-primary" id="eventoModalSave" style="width:auto; padding:10px 22px;">Guardar</button>
       </div>
     </form>
   </div>

@@ -62,10 +62,25 @@ const RENDERERS = {
     container.innerHTML = html;
   },
   junta(container, items) {
-    container.innerHTML = items.map((it) => `
+    // Presidente y Vicepresidente se muestran arriba, en tarjetas fijas del
+    // organigrama (junta-directiva.html) — esta grilla es solo el resto de
+    // secretarías, para no duplicarlos si el panel publica la lista completa.
+    const datos = items.filter((it) => !["Presidente", "Vicepresidente"].includes((it.cargo || "").trim()));
+    container.innerHTML = datos.map((it) => `
       <div class="junta-card">
-        <div class="junta-avatar">${escapeHtml(it.iniciales)}</div>
+        <div class="junta-avatar">${it.foto ? `<img src="${escapeAttr(it.foto)}" alt="${escapeAttr(it.nombre)}">` : escapeHtml(it.iniciales)}</div>
         <div><div class="junta-name">${escapeHtml(it.nombre)}</div><div class="junta-role">${escapeHtml(it.cargo)}</div></div>
+      </div>
+    `).join("");
+  },
+  mesa_ibague(container, items) { RENDERERS.mesaRegional(container, items); },
+  mesa_medellin(container, items) { RENDERERS.mesaRegional(container, items); },
+  mesaRegional(container, items) {
+    container.innerHTML = items.map((it) => `
+      <div class="org-card">
+        <div class="org-photo">${it.foto ? `<img src="${escapeAttr(it.foto)}" alt="${escapeAttr(it.nombre)}">` : escapeHtml((it.nombre || "").split(" ").slice(0, 2).map((w) => w[0] || "").join(""))}</div>
+        <div class="org-name">${escapeHtml(it.nombre)}</div>
+        <div class="org-role">${escapeHtml(it.cargo)}</div>
       </div>
     `).join("");
   },

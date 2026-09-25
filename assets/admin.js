@@ -173,12 +173,13 @@ $("olvideForm").addEventListener("submit", async (e) => {
 // ---------------------------------------------------------------------------
 let CONTENIDO_CARGADO = false;
 let VOTACIONES_CARGADAS = false;
+let EVENTOS_CARGADOS = false;
 document.querySelectorAll(".admin-tab").forEach((tabEl) => {
   tabEl.addEventListener("click", () => {
     document.querySelectorAll(".admin-tab").forEach((t) => t.classList.remove("active"));
     tabEl.classList.add("active");
     const target = tabEl.dataset.tab;
-    ["dashboard", "afiliados", "contenido", "votaciones", "usuarios"].forEach((name) => {
+    ["dashboard", "afiliados", "contenido", "votaciones", "calendario", "usuarios"].forEach((name) => {
       $(`tab-${name}`).hidden = name !== target;
     });
     if (target === "usuarios") cargarAdmins();
@@ -189,6 +190,10 @@ document.querySelectorAll(".admin-tab").forEach((tabEl) => {
     if (target === "votaciones" && !VOTACIONES_CARGADAS) {
       VOTACIONES_CARGADAS = true;
       cargarVotaciones();
+    }
+    if (target === "calendario" && !EVENTOS_CARGADOS) {
+      EVENTOS_CARGADOS = true;
+      cargarEventosAdmin();
     }
   });
 });
@@ -752,10 +757,16 @@ const FIELDS_JUNTA = [
   { key: "iniciales", label: "Iniciales" },
   { key: "nombre", label: "Nombre completo" },
   { key: "cargo", label: "Cargo" },
+  { key: "foto", label: "Foto (URL, opcional)" },
 ];
 const FIELDS_GALERIA = [
   { key: "imagen_url", label: "URL de la imagen" },
   { key: "caption", label: "Descripción" },
+];
+const FIELDS_MESA = [
+  { key: "nombre", label: "Nombre completo" },
+  { key: "cargo", label: "Cargo" },
+  { key: "foto", label: "Foto (URL, opcional)" },
 ];
 
 async function cargarPaginaAdmin(pageId) {
@@ -775,7 +786,11 @@ async function cargarPaginaAdmin(pageId) {
     actualizarEstadoLbl("inicio");
   } else if (pageId === "regionales") {
     if (!PAGINAS.regionales.borrador.listas.regionales) PAGINAS.regionales.borrador.listas.regionales = [];
+    if (!PAGINAS.regionales.borrador.listas.mesa_ibague) PAGINAS.regionales.borrador.listas.mesa_ibague = [];
+    if (!PAGINAS.regionales.borrador.listas.mesa_medellin) PAGINAS.regionales.borrador.listas.mesa_medellin = [];
     renderListEditor("regionales", "regionales", FIELDS_REGIONALES);
+    renderListEditor("regionales", "mesa_ibague", FIELDS_MESA);
+    renderListEditor("regionales", "mesa_medellin", FIELDS_MESA);
     actualizarEstadoLbl("regionales");
   } else if (pageId === "junta") {
     if (!PAGINAS.junta.borrador.listas.junta) PAGINAS.junta.borrador.listas.junta = [];
@@ -858,18 +873,28 @@ function attachListEditorEvents(pageId, listId, fieldsConfig) {
 attachListEditorEvents("regionales", "regionales", FIELDS_REGIONALES);
 attachListEditorEvents("junta", "junta", FIELDS_JUNTA);
 attachListEditorEvents("galeria", "galeria", FIELDS_GALERIA);
+attachListEditorEvents("regionales", "mesa_ibague", FIELDS_MESA);
+attachListEditorEvents("regionales", "mesa_medellin", FIELDS_MESA);
 
 $("regionalesAgregarBtn").addEventListener("click", () => {
   PAGINAS.regionales.borrador.listas.regionales.push({ ciudad: "", etiqueta: "", texto: "" });
   renderListEditor("regionales", "regionales", FIELDS_REGIONALES);
 });
 $("juntaAgregarBtn").addEventListener("click", () => {
-  PAGINAS.junta.borrador.listas.junta.push({ iniciales: "", nombre: "", cargo: "" });
+  PAGINAS.junta.borrador.listas.junta.push({ iniciales: "", nombre: "", cargo: "", foto: "" });
   renderListEditor("junta", "junta", FIELDS_JUNTA);
 });
 $("galeriaAgregarBtn").addEventListener("click", () => {
   PAGINAS.galeria.borrador.listas.galeria.push({ imagen_url: "", caption: "" });
   renderListEditor("galeria", "galeria", FIELDS_GALERIA);
+});
+$("mesaIbagueAgregarBtn").addEventListener("click", () => {
+  PAGINAS.regionales.borrador.listas.mesa_ibague.push({ nombre: "", cargo: "", foto: "" });
+  renderListEditor("regionales", "mesa_ibague", FIELDS_MESA);
+});
+$("mesaMedellinAgregarBtn").addEventListener("click", () => {
+  PAGINAS.regionales.borrador.listas.mesa_medellin.push({ nombre: "", cargo: "", foto: "" });
+  renderListEditor("regionales", "mesa_medellin", FIELDS_MESA);
 });
 
 async function guardarBorrador(pageId) {
@@ -1156,5 +1181,134 @@ async function mostrarResultados(votacion) {
   }
   $("resultadosContenido").innerHTML = html;
 }
+
+// =============================================================================
+// Calendario de fechas importantes
+// =============================================================================
+let EVENTOS_CAL = [];
+
+const CATEGORIAS_EVENTO = {
+  marcha: "Marcha / movilización",
+  asamblea: "Asamblea",
+  aniversario: "Aniversario",
+  capacitacion: "Capacitación",
+  eleccion: "Elección",
+  otro: "Actividad",
+};
+
+async function cargarEventosAdmin() {
+  const snap = await getDocs(collection(db, "eventos_calendario"));
+  EVENTOS_CAL = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  EVENTOS_CAL.sort((a, b) => (b.fecha || "").localeCompare(a.fecha || ""));
+  renderEventosTabla();
+}
+
+function renderEventosTabla() {
+  $("eventosTbody").innerHTML = EVENTOS_CAL.map((ev) => `
+    <tr>
+      <td>${escapeHtml(ev.fecha || "—")}</td>
+      <td>${escapeHtml(ev.titulo)}</td>
+      <td>${escapeHtml(CATEGORIAS_EVENTO[ev.categoria] || CATEGORIAS_EVENTO.otro)}</td>
+      <td>${(ev.fotos || []).length}</td>
+      <td><span class="badge ${ev.estado === "publicado" ? "badge-publicado" : "badge-borrador"}">${ev.estado === "publicado" ? "Publicado" : "Borrador"}</span></td>
+      <td>
+        <div class="row-actions">
+          <button class="icon-btn" data-action="editar" data-id="${ev.id}">Editar</button>
+          <button class="icon-btn" data-action="toggle-estado" data-id="${ev.id}">${ev.estado === "publicado" ? "Despublicar" : "Publicar"}</button>
+          <button class="icon-btn" data-action="eliminar" data-id="${ev.id}">Eliminar</button>
+        </div>
+      </td>
+    </tr>
+  `).join("") || `<tr><td colspan="6" class="loading-row">No hay eventos todavía.</td></tr>`;
+}
+
+$("eventosTbody").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-action]");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const evento = EVENTOS_CAL.find((ev) => ev.id === id);
+  const accion = btn.dataset.action;
+  if (accion === "editar") {
+    abrirModalEvento(evento);
+  } else if (accion === "toggle-estado") {
+    const nuevoEstado = evento.estado === "publicado" ? "borrador" : "publicado";
+    await setDoc(doc(db, "eventos_calendario", id), { estado: nuevoEstado }, { merge: true });
+    mostrarToast(nuevoEstado === "publicado" ? "Evento publicado." : "Evento despublicado.");
+    await cargarEventosAdmin();
+  } else if (accion === "eliminar") {
+    if (!confirm(`¿Eliminar el evento "${evento.titulo}"? Esta acción no se puede deshacer.`)) return;
+    await deleteDoc(doc(db, "eventos_calendario", id));
+    mostrarToast("Evento eliminado.");
+    await cargarEventosAdmin();
+  }
+});
+
+function abrirModalEvento(evento) {
+  $("eventoFormError").hidden = true;
+  $("eventoForm").reset();
+  if (evento) {
+    $("eventoModalTitle").textContent = "Editar evento";
+    $("ev_id").value = evento.id;
+    $("ev_titulo").value = evento.titulo || "";
+    $("ev_fecha").value = evento.fecha || "";
+    $("ev_categoria").value = evento.categoria || "otro";
+    $("ev_descripcion").value = evento.descripcion || "";
+    $("ev_fotos").value = (evento.fotos || []).join("\n");
+    $("ev_publicado").checked = evento.estado === "publicado";
+  } else {
+    $("eventoModalTitle").textContent = "Nuevo evento";
+    $("ev_id").value = "";
+    $("ev_categoria").value = "marcha";
+    $("ev_publicado").checked = false;
+  }
+  $("eventoModal").hidden = false;
+}
+
+$("openNewEventoBtn").addEventListener("click", () => abrirModalEvento(null));
+$("eventoModalCancel").addEventListener("click", () => { $("eventoModal").hidden = true; });
+
+$("eventoForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("eventoFormError");
+  err.hidden = true;
+  const titulo = $("ev_titulo").value.trim();
+  const fecha = $("ev_fecha").value;
+  if (!titulo || !fecha) {
+    err.textContent = "El título y la fecha son obligatorios.";
+    err.hidden = false;
+    return;
+  }
+  const fotos = $("ev_fotos").value.split("\n").map((s) => s.trim()).filter(Boolean);
+  const idExistente = $("ev_id").value;
+  const data = {
+    titulo,
+    fecha,
+    categoria: $("ev_categoria").value,
+    descripcion: $("ev_descripcion").value.trim(),
+    fotos,
+    estado: $("ev_publicado").checked ? "publicado" : "borrador",
+    actualizado_en: new Date().toISOString(),
+  };
+  const btn = $("eventoModalSave");
+  btn.disabled = true;
+  btn.textContent = "Guardando…";
+  try {
+    if (idExistente) {
+      await setDoc(doc(db, "eventos_calendario", idExistente), data, { merge: true });
+    } else {
+      const nuevoRef = doc(collection(db, "eventos_calendario"));
+      await setDoc(nuevoRef, { ...data, creado_en: new Date().toISOString() });
+    }
+    $("eventoModal").hidden = true;
+    mostrarToast("Evento guardado.");
+    await cargarEventosAdmin();
+  } catch (e2) {
+    err.textContent = "No se pudo guardar. Intenta de nuevo.";
+    err.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Guardar";
+  }
+});
 
 $("resultadosModalCerrar").addEventListener("click", () => { $("resultadosModal").hidden = true; });

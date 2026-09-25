@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Sandra Patricia Quintero Rodríguez",
+    "role": "Secretaría de Organización y Formación",
+    "photo": "assets/equipo/ibague-sandra-quintero.jpg"
+  },
+  {
+    "name": "Esmeralda Cala Ferreira",
+    "role": "Tesorera",
+    "photo": "assets/equipo/ibague-esmeralda-cala.jpg"
+  },
+  {
+    "name": "Diana Carolina Zuluaga Herrán",
+    "role": "Secretaria General",
+    "photo": "assets/equipo/ibague-diana-zuluaga.jpg"
+  },
+  {
+    "name": "Ingrid Katherine Murcia Castellanos",
+    "role": "Secretaría de Prensa y Publicidad",
+    "photo": "assets/equipo/ibague-ingrid-murcia.jpg"
+  },
+  {
+    "name": "Johana Alejandra Torres Buitrago",
+    "role": "Secretaría de Asuntos Jurídicos, Laborales e Intersindicales",
+    "photo": "assets/equipo/ibague-johana-torres.jpg"
+  },
+  {
+    "name": "Angélica María Bohórquez Heredia",
+    "role": "Fiscal",
+    "photo": "assets/equipo/ibague-angelica-bohorquez.jpg"
+  },
+  {
+    "name": "Liliana Mayret Ballares Zorro",
+    "role": "Secretaría de Salud y el Deporte",
+    "photo": "assets/equipo/ibague-liliana-ballares.jpg"
+  },
+  {
+    "name": "Laura Estefanía Carrillo Guerra",
+    "role": "Secretaría de la Mujer",
+    "photo": "assets/equipo/ibague-laura-carrillo.jpg"
+  }
+]

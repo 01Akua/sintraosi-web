@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Mónica María Hoyos Maya",
+    "role": "Presidente Medellín",
+    "photo": "assets/equipo/medellin-monica-hoyos.jpg"
+  },
+  {
+    "name": "Luz Mery González Rivera",
+    "role": "Vicepresidente",
+    "photo": "assets/equipo/medellin-luz-mery-gonzalez.jpg"
+  },
+  {
+    "name": "Leidy Johanna Restrepo Ortiz",
+    "role": "Secretaria General",
+    "photo": "assets/equipo/medellin-leidy-restrepo.jpg"
+  },
+  {
+    "name": "María Piedad Zuluaga Ramírez",
+    "role": "Tesorera",
+    "photo": "assets/equipo/medellin-maria-piedad-zuluaga.jpg"
+  },
+  {
+    "name": "María Paulina Sierra Monsalve",
+    "role": "Revisor Fiscal",
+    "photo": "assets/equipo/medellin-maria-paulina-sierra.jpg"
+  },
+  {
+    "name": "Cristina Adriana Ospina Arango",
+    "role": "Secretaría de Asuntos Jurídicos e Intersindicales",
+    "photo": "assets/equipo/medellin-cristina-ospina.jpg"
+  },
+  {
+    "name": "Sulien Castaño Beltrán",
+    "role": "Secretaría de Salud y Bienestar",
+    "photo": "assets/equipo/medellin-sulien-castano.jpg"
+  },
+  {
+    "name": "Catalina Cardona Castaño",
+    "role": "Secretaría de Organización y Formación",
+    "photo": "assets/equipo/medellin-catalina-cardona.jpg"
+  },
+  {
+    "name": "Lina María Martínez Ruiz",
+    "role": "Secretaría de Organización y Formación",
+    "photo": "assets/equipo/medellin-lina-martinez.jpg"
+  },
+  {
+    "name": "Claudia Patricia Chica Rojas",
+    "role": "Secretaría de Organización y Formación",
+    "photo": "assets/equipo/medellin-claudia-chica.jpg"
+  }
+]

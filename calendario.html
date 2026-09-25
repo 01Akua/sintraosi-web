@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario — SINTRAOSI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700;8..60,800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<style>
+  .cal-wrap{max-width:1040px; margin:0 auto; padding:56px 28px 80px; display:grid; grid-template-columns:400px 1fr; gap:32px; align-items:start;}
+  @media (max-width:860px){ .cal-wrap{grid-template-columns:1fr;} }
+
+  /* ---- Calendario mensual ---- */
+  .cal-card{background:#fff; border:1px solid var(--linea); border-radius:16px; padding:24px; position:sticky; top:100px;}
+  @media (max-width:860px){ .cal-card{position:static;} }
+  .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
+  .cal-head h2{font-size:1.05rem; color:var(--navy-950); text-transform:capitalize;}
+  .cal-nav{display:flex; gap:8px;}
+  .cal-nav button{width:32px; height:32px; border-radius:8px; border:1px solid var(--linea); background:#fff; cursor:pointer; font-size:0.95rem; color:var(--navy-900);}
+  .cal-nav button:hover{border-color:var(--blue-400); color:var(--blue-700);}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center;}
+  .cal-dow{font-family:'IBM Plex Mono'; font-size:0.62rem; color:var(--texto-mute); text-transform:uppercase; padding-bottom:6px;}
+  .cal-day{
+    position:relative; aspect-ratio:1; display:flex; align-items:center; justify-content:center;
+    border-radius:8px; font-size:0.82rem; color:var(--texto); cursor:default;
+  }
+  .cal-day.pad{visibility:hidden;}
+  .cal-day.today{border:1px solid var(--blue-500); font-weight:700;}
+  .cal-day.has-event{cursor:pointer; font-weight:600; background:var(--sky-50);}
+  .cal-day.has-event:hover{background:var(--sky-100);}
+  .cal-day.has-event .dot{position:absolute; bottom:5px; width:5px; height:5px; border-radius:50%; background:var(--blue-600);}
+  .cal-day.has-event.is-past .dot{background:var(--texto-mute);}
+  .cal-legend{display:flex; gap:16px; margin-top:16px; flex-wrap:wrap;}
+  .cal-legend span{font-size:0.72rem; color:var(--texto-mute); display:flex; align-items:center; gap:6px;}
+  .cal-legend i{width:8px; height:8px; border-radius:50%; display:inline-block; background:var(--blue-600);}
+
+  /* ---- Lista de eventos ---- */
+  .cal-section-title{font-family:'IBM Plex Mono'; font-size:0.7rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--blue-700); font-weight:600; margin:0 0 14px;}
+  .evento-card{background:#fff; border:1px solid var(--linea); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  .evento-head{display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap;}
+  .evento-fecha{font-family:'IBM Plex Mono'; font-size:0.72rem; color:var(--blue-700); text-transform:uppercase; letter-spacing:0.03em; font-weight:600;}
+  .evento-cat{font-size:0.68rem; padding:3px 10px; border-radius:99px; background:var(--sky-100); color:var(--blue-800); font-weight:600; white-space:nowrap;}
+  .evento-card.pasado .evento-cat{background:var(--papel-2); color:var(--texto-mute);}
+  .evento-card h3{font-family:'Source Serif 4'; font-size:1.08rem; margin:8px 0 8px; color:var(--navy-950);}
+  .evento-card p{font-size:0.88rem; color:var(--texto-mute); line-height:1.55;}
+  .evento-fotos{display:grid; grid-template-columns:repeat(auto-fill,minmax(84px,1fr)); gap:8px; margin-top:14px;}
+  .evento-fotos img{width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; cursor:pointer; transition:transform .15s ease, opacity .15s ease;}
+  .evento-fotos img:hover{transform:scale(1.04); opacity:0.9;}
+  .cal-empty{color:var(--texto-mute); font-size:0.88rem;}
+  .cal-tabs{display:flex; gap:8px; margin-bottom:22px;}
+  .cal-tab{padding:8px 16px; border-radius:99px; border:1px solid var(--linea); background:#fff; font-size:0.82rem; font-weight:600; color:var(--texto-mute); cursor:pointer;}
+  .cal-tab.active{background:var(--navy-950); color:#fff; border-color:var(--navy-950);}
+
+  /* ---- Lightbox ---- */
+  #lightbox{position:fixed; inset:0; background:rgba(6,22,38,0.92); display:none; align-items:center; justify-content:center; z-index:999; padding:32px; cursor:zoom-out;}
+  #lightbox.open{display:flex;}
+  #lightbox img{max-width:100%; max-height:100%; border-radius:8px; box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+</style>
+</head>
+<body data-page="calendario">
+
+<div id="header-placeholder"></div>
+
+<section class="page-hero">
+  <div class="wrap">
+    <div class="breadcrumb"><a href="index.html">Inicio</a> / <span>Calendario</span></div>
+    <h1>Calendario de fechas importantes</h1>
+    <p class="lede">Marchas, asambleas, aniversarios y actividades del sindicato. Los eventos que ya ocurrieron guardan las fotos del momento.</p>
+  </div>
+</section>
+
+<div class="cal-wrap">
+  <div class="cal-card">
+    <div class="cal-head">
+      <h2 id="calMesLabel">—</h2>
+      <div class="cal-nav">
+        <button type="button" id="calPrev" aria-label="Mes anterior">←</button>
+        <button type="button" id="calHoy" aria-label="Ir a hoy" style="width:auto; padding:0 10px; font-size:0.72rem;">Hoy</button>
+        <button type="button" id="calNext" aria-label="Mes siguiente">→</button>
+      </div>
+    </div>
+    <div class="cal-grid" id="calGridDow">
+      <div class="cal-dow">D</div><div class="cal-dow">L</div><div class="cal-dow">M</div><div class="cal-dow">M</div><div class="cal-dow">J</div><div class="cal-dow">V</div><div class="cal-dow">S</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-legend">
+      <span><i></i> Con evento publicado</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="cal-tabs">
+      <div class="cal-tab active" data-vista="proximos">Próximos eventos</div>
+      <div class="cal-tab" data-vista="pasados">Eventos pasados y fotos</div>
+    </div>
+    <div id="vistaProximos">
+      <div id="listaProximos"><p class="cal-empty">Cargando…</p></div>
+    </div>
+    <div id="vistaPasados" hidden>
+      <div id="listaPasados"><p class="cal-empty">Cargando…</p></div>
+    </div>
+  </div>
+</div>
+
+<div id="lightbox"><img id="lightboxImg" src="" alt=""></div>
+
+<div id="footer-placeholder"></div>
+<script src="assets/firebase-config.js"></script>
+<script type="module" src="assets/calendario.js"></script>
+<script src="assets/main.js"></script>
+</body>
+</html>
