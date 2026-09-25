@@ -73,8 +73,15 @@ const RENDERERS = {
       </div>
     `).join("");
   },
-  mesa_ibague(container, items) { RENDERERS.mesaRegional(container, items); },
-  mesa_medellin(container, items) { RENDERERS.mesaRegional(container, items); },
+  // El cargo de mayor jerarquía se muestra arriba, en tarjetas fijas del
+  // organigrama — esta grilla es solo el resto del equipo, para no
+  // duplicarlo si el panel publica la lista completa.
+  mesa_ibague(container, items) {
+    RENDERERS.mesaRegional(container, items.filter((it) => (it.cargo || "").trim() !== "Secretaria General"));
+  },
+  mesa_medellin(container, items) {
+    RENDERERS.mesaRegional(container, items.filter((it) => !["Presidente Medellín", "Vicepresidente"].includes((it.cargo || "").trim())));
+  },
   mesaRegional(container, items) {
     container.innerHTML = items.map((it) => `
       <div class="org-card">

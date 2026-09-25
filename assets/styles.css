@@ -506,6 +506,17 @@ section + section, .aliados + section, section + .aliados{border-top:1px solid v
   text-transform:uppercase; letter-spacing:0.03em; line-height:1.4;
 }
 
+/* Organigrama de mesas regionales por niveles (variante clara: tier-wrap + connector + org-card) */
+.org-tier-wrap{display:flex; justify-content:center; flex-wrap:wrap; gap:22px; margin-bottom:8px;}
+.org-tier-wrap .org-card{width:190px;}
+.org-tier-wrap.tier-1 .org-card{width:210px; border-color:var(--blue-400); box-shadow:0 16px 30px -18px rgba(17,55,98,0.25);}
+.org-tier-wrap.tier-1 .org-photo, .org-tier-wrap.tier-2 .org-photo{width:96px; height:96px;}
+.org-tier-label-light{
+  text-align:center; font-family:'IBM Plex Mono'; font-size:0.64rem; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--texto-mute); margin:0 0 10px;
+}
+.org-connector-light{width:1px; height:22px; background:var(--linea); margin:0 auto 22px;}
+
 /* ---------- PRINCIPIOS ---------- */
 .principios{background:var(--papel);}
 .prin-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:22px;}
@@ -718,6 +729,7 @@ footer{background:var(--navy-950); color:rgba(255,255,255,0.7); padding:52px 0 2
   .valor-grid, .reg-grid, .reg-grid.reg-grid-3, .gal-grid, .form-grid, .upload-row{grid-template-columns:repeat(2,1fr);}
   .org-grid{grid-template-columns:repeat(3,1fr);}
   .org-tier .junta-card{max-width:none;}
+  .org-tier-wrap .org-card, .org-tier-wrap.tier-1 .org-card{width:170px;}
   .foot-grid{grid-template-columns:1fr 1fr;}
   .doc-row{grid-template-columns:36px 1fr; row-gap:8px;}
   .doc-verified, .doc-dl{grid-column:2;}
@@ -727,6 +739,8 @@ footer{background:var(--navy-950); color:rgba(255,255,255,0.7); padding:52px 0 2
 @media (max-width:640px){
   .junta-grid, .prin-grid, .news-grid, .hub-grid, .valor-grid, .reg-grid, .reg-grid.reg-grid-3, .gal-grid, .form-grid, .upload-row{grid-template-columns:1fr;}
   .org-grid{grid-template-columns:repeat(2,1fr);}
+  .org-tier-wrap{gap:14px;}
+  .org-tier-wrap .org-card, .org-tier-wrap.tier-1 .org-card{width:calc(50% - 7px);}
   .doc-toolbar select{width:100%;}
   .hero-stats{grid-template-columns:1fr;}
 }
