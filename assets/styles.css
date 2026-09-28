@@ -362,12 +362,15 @@ nav.links > a:hover::after{width:100%;}
   content:""; position:absolute; inset:0; pointer-events:none;
   background:radial-gradient(circle at 85% 0%, rgba(60,154,92,0.22) 0, transparent 45%);
 }
-/* Variante con foto representativa de la ciudad (subpáginas regional-*.html) */
+/* Variante con foto representativa de la ciudad (subpáginas regional-*.html) —
+   hero más alto e inmersivo, para que la foto tenga presencia real en la
+   página y no se sienta como una franja angosta desconectada del resto. */
 .page-hero.has-photo{
-  padding:130px 0 54px;
+  padding:190px 0 150px;
+  background-attachment:fixed;
   background-image:
-    linear-gradient(100deg, rgba(12,39,67,0.82) 0%, rgba(17,55,98,0.42) 65%, rgba(17,55,98,0.2) 100%),
-    linear-gradient(0deg, rgba(6,22,38,0.55) 0%, rgba(6,22,38,0.08) 45%, rgba(6,22,38,0.6) 100%),
+    linear-gradient(100deg, rgba(12,39,67,0.8) 0%, rgba(17,55,98,0.38) 60%, rgba(17,55,98,0.16) 100%),
+    linear-gradient(0deg, rgba(6,22,38,0.6) 0%, rgba(6,22,38,0.05) 42%, rgba(6,22,38,0.1) 70%, rgba(6,22,38,0.7) 100%),
     var(--hero-photo);
   background-size:cover; background-position:center;
 }
@@ -745,6 +748,8 @@ footer{background:var(--navy-950); color:rgba(255,255,255,0.7); padding:52px 0 2
   .doc-verified, .doc-dl{grid-column:2;}
   .timeline{padding-left:26px;}
   .cont-info .item{gap:12px;}
+  /* background-attachment:fixed es problemático en iOS Safari — se desactiva en móvil/tablet */
+  .page-hero.has-photo{padding:150px 0 110px; background-attachment:scroll;}
 }
 @media (max-width:640px){
   .junta-grid, .prin-grid, .news-grid, .hub-grid, .valor-grid, .reg-grid, .reg-grid.reg-grid-3, .gal-grid, .form-grid, .upload-row{grid-template-columns:1fr;}
