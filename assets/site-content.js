@@ -40,20 +40,23 @@ const RENDERERS = {
     let html = datos.map((it) => {
       const slug = SLUGS_REGIONALES[it.ciudad];
       const href = slug ? `regional-${slug}.html` : "noticias.html";
+      const foto = slug ? `assets/regionales/${slug}.jpg` : "";
       return `
       <div class="reg-card">
-        <div class="reg-code">${escapeHtml(it.ciudad || "").slice(0, 3).toUpperCase()}</div>
-        <div class="reg-city">${escapeHtml(it.ciudad)}</div>
-        <div class="reg-tag">${escapeHtml(it.etiqueta)}</div>
-        ${it.texto ? `<p style="font-size:0.85rem; color:var(--texto-mute); margin-top:6px;">${escapeHtml(it.texto)}</p>` : ""}
-        <a href="${href}" class="reg-link">Ver regional →</a>
+        <div class="reg-photo">${foto ? `<img src="${escapeAttr(foto)}" alt="${escapeAttr(it.ciudad)}" loading="lazy">` : ""}<span class="reg-code">${escapeHtml(it.ciudad || "").slice(0, 3).toUpperCase()}</span></div>
+        <div class="reg-card-body">
+          <div class="reg-city">${escapeHtml(it.ciudad)}</div>
+          <div class="reg-tag">${escapeHtml(it.etiqueta)}</div>
+          ${it.texto ? `<p style="font-size:0.85rem; color:var(--texto-mute); margin-top:6px;">${escapeHtml(it.texto)}</p>` : ""}
+          <a href="${href}" class="reg-link">Ver regional →</a>
+        </div>
       </div>
     `;
     }).join("");
     // Tarjeta fija de "contáctanos" al final, solo en la página completa de regionales.
     if (container.dataset.cmsExtraCard === "contacto") {
       html += `
-        <div class="reg-card" style="justify-content:center; align-items:center; text-align:center;">
+        <div class="reg-card no-photo" style="justify-content:center; align-items:center; text-align:center;">
           <p style="font-size:0.85rem; color:var(--texto-mute);">¿Tu ciudad no aparece? Escríbenos.</p>
           <a href="contacto.html" class="reg-link">Contáctanos →</a>
         </div>
