@@ -100,7 +100,8 @@ img{max-width:100%; display:block;}
 .mobile-menu a.active{color:var(--blue-400);}
 
 /* ---------- dropdown nav (desktop) ---------- */
-.has-dropdown{position:relative;}
+.has-dropdown{position:relative; flex-shrink:0;}
+.has-dropdown > a{white-space:nowrap;}
 .dropdown{
   position:absolute; top:100%; left:50%; transform:translateX(-50%) translateY(4px);
   background:var(--navy-900); border:1px solid var(--linea-clara); border-radius:10px;
@@ -228,6 +229,7 @@ header.scrolled{
 .brand-name{font-family:'Source Serif 4'; font-weight:800; font-size:1.05rem; letter-spacing:0.01em;}
 .brand-sub{font-size:0.66rem; color:rgba(255,255,255,0.55); letter-spacing:0.02em; white-space:nowrap;}
 nav.links{display:flex; gap:24px; align-items:center;}
+nav.links > *{flex-shrink:0;}
 nav.links a{font-size:0.86rem; font-weight:500; color:rgba(255,255,255,0.8); transition:color .15s; position:relative;}
 nav.links > a::after, .has-dropdown > a::before{
   content:""; position:absolute; left:0; bottom:-6px; width:0; height:2px;
