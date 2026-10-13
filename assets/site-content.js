@@ -45,7 +45,7 @@ const RENDERERS = {
       <div class="reg-card">
         <div class="reg-photo">${foto ? `<img src="${escapeAttr(foto)}" alt="${escapeAttr(it.ciudad)}" loading="lazy">` : ""}<span class="reg-code">${escapeHtml(it.ciudad || "").slice(0, 3).toUpperCase()}</span></div>
         <div class="reg-card-body">
-          <div class="reg-city">${escapeHtml(it.ciudad)}</div>
+          <div class="reg-city"><img src="assets/logo-sintraosi.png" alt="" class="reg-city-logo">${escapeHtml(it.ciudad)}</div>
           <div class="reg-tag">${escapeHtml(it.etiqueta)}</div>
           ${it.texto ? `<p style="font-size:0.85rem; color:var(--texto-mute); margin-top:6px;">${escapeHtml(it.texto)}</p>` : ""}
           <a href="${href}" class="reg-link">Ver regional →</a>

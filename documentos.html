@@ -7,6 +7,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700;8..60,800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/styles.css">
+<style>
+  .votar-card{background:#fff; border:1px solid var(--linea); border-radius:16px; padding:32px; max-width:520px; margin:0 auto 32px;}
+  .votar-field{margin-bottom:18px;}
+  .votar-field label{display:block; font-family:'IBM Plex Mono',monospace; font-size:0.72rem; letter-spacing:.04em; text-transform:uppercase; color:var(--texto-mute); margin-bottom:6px;}
+  .votar-field input{width:100%; padding:11px 14px; border:1px solid var(--linea); border-radius:8px; font-size:0.95rem;}
+  .votar-btn{width:100%; padding:13px 16px; border:none; border-radius:8px; background:var(--blue-700); color:#fff; font-weight:600; font-size:0.95rem; cursor:pointer;}
+  .votar-btn:hover{background:var(--blue-800);}
+  .votar-btn:disabled{opacity:.6; cursor:not-allowed;}
+  .votar-error{background:var(--rojo-tint); color:var(--teal-dark); border:1px solid var(--rojo); border-radius:8px; padding:11px 14px; font-size:0.85rem; margin-bottom:16px;}
+  [hidden]{display:none!important;}
+</style>
 </head>
 <body data-page="documentos">
 
@@ -22,38 +33,59 @@
 
 <section style="padding-top:64px;">
   <div class="wrap">
-    <div class="doc-toolbar reveal">
-      <select><option>Todos los años</option><option>2021</option></select>
+
+    <div class="votar-card" id="pasoIdentidadDocs">
+      <h2 style="font-size:1.1rem; margin-bottom:6px;">Verifica tu afiliación para ver los documentos</h2>
+      <p style="font-size:0.85rem; color:var(--texto-mute); margin-bottom:20px;">Los estados financieros son información sensible del sindicato: solo afiliados activos pueden consultarlos y descargarlos. Usamos tu cédula y fecha de nacimiento únicamente para confirmar que estás habilitado.</p>
+      <div id="identidadDocsError" class="votar-error" hidden></div>
+      <form id="identidadDocsForm">
+        <div class="votar-field">
+          <label for="doc_cedula">Cédula</label>
+          <input type="text" id="doc_cedula" inputmode="numeric" required>
+        </div>
+        <div class="votar-field">
+          <label for="doc_fecha_nacimiento">Fecha de nacimiento</label>
+          <input type="date" id="doc_fecha_nacimiento" required>
+        </div>
+        <button type="submit" class="votar-btn" id="identidadDocsBtn">Verificar y continuar</button>
+      </form>
     </div>
-    <div class="doc-list reveal">
-      <div class="doc-row">
-        <div class="doc-icon">PDF</div>
-        <div>
-          <div class="doc-name">Reporte Enero 2021</div>
-          <div class="doc-meta">Estados financieros · 2021</div>
-        </div>
-        <div class="doc-verified">✓ Verificado</div>
-        <a href="#" class="doc-dl">Descargar</a>
+
+    <div id="docContenido" hidden>
+      <div class="doc-toolbar reveal">
+        <select><option>Todos los años</option><option>2021</option></select>
       </div>
-      <div class="doc-row pending">
-        <div class="doc-icon">PDF</div>
-        <div>
-          <div class="doc-name">Estatutos del sindicato</div>
-          <div class="doc-meta">Próximamente</div>
+      <div class="doc-list reveal">
+        <div class="doc-row">
+          <div class="doc-icon">PDF</div>
+          <div>
+            <div class="doc-name">Reporte Enero 2021</div>
+            <div class="doc-meta">Estados financieros · 2021</div>
+          </div>
+          <div class="doc-verified">✓ Verificado</div>
+          <a href="#" class="doc-dl">Descargar</a>
         </div>
-        <div class="doc-verified">Pendiente</div>
-        <a href="#" class="doc-dl">—</a>
-      </div>
-      <div class="doc-row pending">
-        <div class="doc-icon">PDF</div>
-        <div>
-          <div class="doc-name">Convención colectiva</div>
-          <div class="doc-meta">Próximamente</div>
+        <div class="doc-row pending">
+          <div class="doc-icon">PDF</div>
+          <div>
+            <div class="doc-name">Estatutos del sindicato</div>
+            <div class="doc-meta">Próximamente</div>
+          </div>
+          <div class="doc-verified">Pendiente</div>
+          <a href="#" class="doc-dl">—</a>
         </div>
-        <div class="doc-verified">Pendiente</div>
-        <a href="#" class="doc-dl">—</a>
+        <div class="doc-row pending">
+          <div class="doc-icon">PDF</div>
+          <div>
+            <div class="doc-name">Convención colectiva</div>
+            <div class="doc-meta">Próximamente</div>
+          </div>
+          <div class="doc-verified">Pendiente</div>
+          <a href="#" class="doc-dl">—</a>
+        </div>
       </div>
     </div>
+
   </div>
 </section>
 
@@ -68,18 +100,18 @@
     </div>
     <div class="news-grid reveal-stagger" data-cms-list="noticias" data-cms-limite="3">
       <div class="news-card">
-        <div class="news-thumb"><img src="assets/foto-2.jpg" alt="Comunicado SINTRAOSI Medellín"></div>
+        <div class="news-thumb"><img src="assets/avisos/convocatoria-delegados-2026.jpg" alt="Convocatoria postulación de delegados nacionales SINTRAOSI 2026"></div>
         <div class="news-body">
-          <div class="news-region">SINTRAOSI Medellín</div>
-          <h3>¡Pago de saldos en fondos de pensiones! Comunicado…</h3>
+          <div class="news-region">SINTRAOSI Nacional</div>
+          <h3>Convocatoria: postulación de delegados nacionales 2026</h3>
           <a href="noticias.html" class="read">Leer más →</a>
         </div>
       </div>
       <div class="news-card">
-        <div class="news-thumb"><img src="assets/foto-4.jpg" alt="Jornada SINTRAOSI Barranquilla"></div>
+        <div class="news-thumb"><img src="assets/foto-2.jpg" alt="Comunicado SINTRAOSI Medellín"></div>
         <div class="news-body">
-          <div class="news-region">SINTRAOSI Barranquilla</div>
-          <h3>¡Barranquilla en pie de lucha! Keralty arremete…</h3>
+          <div class="news-region">SINTRAOSI Medellín</div>
+          <h3>¡Pago de saldos en fondos de pensiones! Comunicado…</h3>
           <a href="noticias.html" class="read">Leer más →</a>
         </div>
       </div>
@@ -101,6 +133,7 @@
 <div id="footer-placeholder"></div>
 <script src="assets/firebase-config.js"></script>
 <script type="module" src="assets/site-content.js"></script>
+<script type="module" src="assets/documentos.js"></script>
 <script src="assets/main.js"></script>
 </body>
 </html>
