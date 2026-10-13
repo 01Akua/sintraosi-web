@@ -225,7 +225,8 @@ header.scrolled{
   max-width:1180px; margin:0 auto;
 }
 .brand{display:flex; align-items:center; gap:12px; flex-shrink:0;}
-.brand .sello{width:64px; height:64px;}
+.brand .sello{width:84px; height:84px; background:none; box-shadow:none;}
+.brand .sello img{width:100%; height:100%;}
 .brand-name{font-family:'Source Serif 4'; font-weight:800; font-size:1.05rem; letter-spacing:0.01em;}
 .brand-sub{font-size:0.66rem; color:rgba(255,255,255,0.55); letter-spacing:0.02em; white-space:nowrap;}
 nav.links{display:flex; gap:24px; align-items:center;}
@@ -783,7 +784,7 @@ footer{background:var(--navy-950); color:rgba(255,255,255,0.7); padding:52px 0 2
   .wrap{padding:0 18px;}
   .nav{padding:12px 18px; gap:10px;}
   .brand-sub{display:none;}
-  .brand .sello{width:48px; height:48px;}
+  .brand .sello{width:58px; height:58px;}
   .aliado-logo{width:104px; height:68px; padding:10px;}
   .aliado-logo img{max-height:32px;}
   .aliados-label{font-size:0.6rem; gap:10px; max-width:100%;}
