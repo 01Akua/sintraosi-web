@@ -33,53 +33,66 @@
 
 <section class="afiliate-form">
   <div class="wrap" style="max-width:880px;">
-    <form class="form-card reveal" onsubmit="return false;">
+    <form class="form-card reveal" id="afiliateForm">
       <h3>Datos personales</h3>
       <div class="form-grid">
-        <div class="field"><label>Primer nombre</label><input type="text"></div>
-        <div class="field"><label>Segundo nombre</label><input type="text"></div>
-        <div class="field"><label>Primer apellido</label><input type="text"></div>
-        <div class="field"><label>Segundo apellido</label><input type="text"></div>
-        <div class="field"><label>Número de cédula</label><input type="text"></div>
-        <div class="field"><label>Lugar de expedición</label><input type="text"></div>
-        <div class="field"><label>Fecha de nacimiento</label><input type="date"></div>
-        <div class="field"><label>Lugar de nacimiento</label><input type="text"></div>
+        <div class="field"><label>Primer nombre</label><input type="text" id="f_primer_nombre" required></div>
+        <div class="field"><label>Segundo nombre</label><input type="text" id="f_segundo_nombre"></div>
+        <div class="field"><label>Primer apellido</label><input type="text" id="f_primer_apellido" required></div>
+        <div class="field"><label>Segundo apellido</label><input type="text" id="f_segundo_apellido"></div>
+        <div class="field"><label>Número de cédula</label><input type="text" id="f_cedula" inputmode="numeric" required></div>
+        <div class="field"><label>Lugar de expedición</label><input type="text" id="f_lugar_expedicion"></div>
+        <div class="field"><label>Fecha de nacimiento</label><input type="date" id="f_fecha_nacimiento" required></div>
+        <div class="field"><label>Lugar de nacimiento</label><input type="text" id="f_lugar_nacimiento"></div>
         <div class="field"><label>Estado civil</label>
-          <select><option>Seleccione…</option><option>Soltero (a)</option><option>Casado (a)</option><option>Unión libre</option></select>
+          <select id="f_estado_civil"><option value="">Seleccione…</option><option>Soltero (a)</option><option>Casado (a)</option><option>Unión libre</option></select>
         </div>
       </div>
 
       <h3>Residencia</h3>
       <div class="form-grid">
-        <div class="field"><label>Departamento de residencia</label><input type="text"></div>
-        <div class="field"><label>Municipio de residencia</label><input type="text"></div>
-        <div class="field" style="grid-column:1/-1;"><label>Ciudad de residencia</label><input type="text"></div>
+        <div class="field"><label>Departamento de residencia</label><input type="text" id="f_departamento"></div>
+        <div class="field"><label>Municipio de residencia</label><input type="text" id="f_municipio"></div>
+        <div class="field" style="grid-column:1/-1;"><label>Ciudad de residencia</label><input type="text" id="f_ciudad"></div>
       </div>
 
       <h3>Vinculación laboral</h3>
       <div class="form-grid">
-        <div class="field"><label>Empresa</label><input type="text" placeholder="Ej. Clínica Colsanitas"></div>
+        <div class="field"><label>Empresa</label><input type="text" id="f_empresa" placeholder="Ej. Clínica Colsanitas"></div>
         <div class="field"><label>Tipo de contrato</label>
-          <select><option>Seleccione…</option><option>Término indefinido</option><option>Término fijo</option><option>Obra o labor</option></select>
+          <select id="f_tipo_contrato"><option value="">Seleccione…</option><option>Término indefinido</option><option>Término fijo</option><option>Obra o labor</option></select>
         </div>
       </div>
 
       <h3>Documentos requeridos</h3>
+      <p style="font-size:0.8rem; color:var(--texto-mute); margin-top:-6px; margin-bottom:12px;">Formatos admitidos: JPG, PNG o PDF. Máximo 350 KB por archivo (usa una foto comprimida o un escaneo liviano).</p>
       <div class="upload-row">
-        <div class="upload-box"><div class="ic">🪪</div>Fotocopia de la cédula</div>
-        <div class="upload-box"><div class="ic">📄</div>Certificación laboral vigente</div>
+        <label class="upload-box" id="box_cedula" for="f_doc_cedula">
+          <div class="ic">🪪</div><span class="upload-box-text">Fotocopia de la cédula</span>
+          <input type="file" id="f_doc_cedula" accept="image/*,.pdf" hidden required>
+        </label>
+        <label class="upload-box" id="box_certificado" for="f_doc_certificado">
+          <div class="ic">📄</div><span class="upload-box-text">Certificación laboral vigente</span>
+          <input type="file" id="f_doc_certificado" accept="image/*,.pdf" hidden required>
+        </label>
       </div>
 
       <div class="cont-check" style="margin-top:24px;">
-        <input type="checkbox" id="terms">
+        <input type="checkbox" id="terms" required>
         <label for="terms">Acepto los términos y condiciones de la afiliación</label>
       </div>
-      <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:8px;">Enviar solicitud de afiliación</button>
+
+      <div id="afiliateError" class="votar-error" hidden style="margin-top:16px; background:#fdeaea; color:#a33; border:1px solid #e3a; border-radius:8px; padding:11px 14px; font-size:0.85rem;"></div>
+      <div id="afiliateOk" hidden style="margin-top:16px; background:var(--sky-100); color:var(--blue-800); border:1px solid var(--blue-600); border-radius:8px; padding:11px 14px; font-size:0.85rem;">Tu solicitud fue enviada. Un delegado de tu regional la revisará en menos de 48 horas.</div>
+
+      <button class="btn btn-primary" id="afiliateSubmitBtn" style="width:100%; justify-content:center; margin-top:8px;" type="submit">Enviar solicitud de afiliación</button>
     </form>
   </div>
 </section>
 
 <div id="footer-placeholder"></div>
+<script src="assets/firebase-config.js"></script>
+<script type="module" src="assets/afiliate.js"></script>
 <script src="assets/main.js"></script>
 </body>
 </html>

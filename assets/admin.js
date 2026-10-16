@@ -425,6 +425,12 @@ function abrirModalAfiliado(afiliado) {
       if (el) el.value = afiliado[c] || "";
     });
     $("f_es_prueba").checked = !!afiliado.es_prueba;
+    const docsLinks = $("afiliadoDocsLinks");
+    const links = [];
+    if (afiliado.documento_cedula_url) links.push(`<a href="${afiliado.documento_cedula_url}" target="_blank" rel="noopener">Ver fotocopia de cédula →</a>`);
+    if (afiliado.documento_certificado_url) links.push(`<a href="${afiliado.documento_certificado_url}" target="_blank" rel="noopener">Ver certificación laboral →</a>`);
+    docsLinks.innerHTML = links.join("");
+    docsLinks.hidden = links.length === 0;
   } else {
     $("afiliadoModalTitle").textContent = "Nuevo afiliado";
     $("f_cedula_original").value = "";
@@ -432,6 +438,7 @@ function abrirModalAfiliado(afiliado) {
     $("f_canal_registro").value = "presencial";
     $("f_estado").value = "activo";
     $("f_es_prueba").checked = false;
+    $("afiliadoDocsLinks").hidden = true;
   }
   $("afiliadoModal").hidden = false;
 }

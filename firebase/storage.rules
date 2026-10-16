@@ -1,0 +1,24 @@
+rules_version = '2';
+
+// Documentos adjuntos a una solicitud de afiliación (cédula + certificación
+// laboral), subidos desde el formulario público /afiliate.html.
+//
+// Escritura: pública, pero restringida por tamaño/tipo. Un cliente anónimo
+// puede subir un archivo propio bajo su cédula; no puede leer ni listar lo
+// que ya hay ahí (así no se pueden "pescar" documentos de otras personas por
+// URL ni enumerar el bucket).
+//
+// Lectura: solo admins del panel (mismo modelo que firestore.rules: cuenta
+// de Firebase Auth + documento admins/{email en minúsculas} en Firestore).
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /solicitudes_afiliacion/{cedula}/{fileName} {
+      allow read: if request.auth != null &&
+        request.auth.token.email != null &&
+        firestore.exists(/databases/(default)/documents/admins/$(request.auth.token.email.lower()));
+
+      allow write: if request.resource.size < 8 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*|application/pdf');
+    }
+  }
+}

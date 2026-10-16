@@ -718,7 +718,10 @@ section + section, .aliados + section, section + .aliados{border-top:1px solid v
   transition:border-color .2s ease, background .2s ease;
 }
 .upload-box:hover{border-color:var(--blue-400); background:var(--sky-100);}
+.upload-box{cursor:pointer; display:flex; flex-direction:column; align-items:center;}
 .upload-box .ic{font-size:1.4rem; margin-bottom:6px;}
+.upload-box.has-file{border-color:var(--blue-600); border-style:solid; background:var(--sky-100); color:var(--blue-800);}
+.upload-box-text{word-break:break-word;}
 
 /* ---------- CONTACTO ---------- */
 .contacto{background:var(--papel);}

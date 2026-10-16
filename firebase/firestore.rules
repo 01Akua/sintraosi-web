@@ -20,10 +20,22 @@ service cloud.firestore {
 
     match /afiliados/{cedula} {
       allow read: if esAdmin();
-      allow create: if esAdmin() &&
+      // Un admin puede crear el registro en cualquier estado/canal desde el
+      // panel. El propio público (sin login) solo puede crear SU PROPIA
+      // solicitud desde /afiliate.html, y únicamente como
+      // canal_registro:'web' + estado:'pendiente_verificacion' (nunca
+      // 'activo', nunca marcarse como registro de prueba). Como esta regla
+      // es "create" (no "update"), si la cédula ya existe la escritura pasa
+      // a necesitar esAdmin() -> no se puede sobreescribir una afiliación
+      // existente desde el formulario público.
+      allow create: if (esAdmin() &&
         request.resource.data.cedula == cedula &&
         request.resource.data.canal_registro in ['presencial', 'web'] &&
-        request.resource.data.estado in ['activo', 'pendiente_verificacion'];
+        request.resource.data.estado in ['activo', 'pendiente_verificacion']) ||
+        (request.resource.data.cedula == cedula &&
+        request.resource.data.canal_registro == 'web' &&
+        request.resource.data.estado == 'pendiente_verificacion' &&
+        request.resource.data.es_prueba == false);
       allow update: if esAdmin();
       allow delete: if esAdmin();
     }
