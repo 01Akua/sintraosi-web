@@ -85,6 +85,12 @@ const RENDERERS = {
   mesa_medellin(container, items) {
     RENDERERS.mesaRegional(container, items.filter((it) => !["Presidente Medellín", "Vicepresidente"].includes((it.cargo || "").trim())));
   },
+  mesa_barranquilla(container, items) {
+    RENDERERS.mesaRegional(container, items.filter((it) => !["Presidente subdirectiva Barranquilla", "Vicepresidente"].includes((it.cargo || "").trim())));
+  },
+  mesa_cartagena(container, items) {
+    RENDERERS.mesaRegional(container, items.filter((it) => !["Presidente", "Vicepresidencia"].includes((it.cargo || "").trim())));
+  },
   mesaRegional(container, items) {
     container.innerHTML = items.map((it) => `
       <div class="org-card">
